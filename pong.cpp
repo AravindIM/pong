@@ -17,9 +17,22 @@ int main(int argc, char* argv[])
 		cleanup(window);
 		return -1;
 	}
+
+	SDL_Event event;
+
 	bool running = true;
 
-	while (running);
+	while (running) {
+		while (SDL_PollEvent(&event)) {
+			switch (event.type) {
+			case SDL_EVENT_QUIT:
+				running = false;
+				break;
+			default:
+				break;
+			}
+		}
+	}
 
 	cleanup(window);
 	return 0;
