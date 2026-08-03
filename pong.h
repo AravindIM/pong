@@ -3,10 +3,13 @@
 
 #pragma once
 
-#include <iostream>
+#include <string>
 #include <SDL3/SDL.h>
 #define WINDOW_WIDTH 800
 #define WINDOW_HEIGHT 600
+#define FRAME_RATE 30
+#define SECOND_IN_MS 1000
+#define FRAME_TIME ( SECOND_IN_MS / FRAME_RATE )
 
 void cleanup(SDL_Window* window);
 
