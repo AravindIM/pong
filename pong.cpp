@@ -7,6 +7,9 @@ class Pong {
 	bool mRunning;
 	SDL_Window* mWindow;
 	SDL_Renderer* mRenderer;
+	SDL_FRect mPlayer1;
+	SDL_FRect mPlayer2;
+	SDL_FRect mBall;
 
 	void MainLoop();
 	void Tick();
@@ -65,6 +68,12 @@ void Pong::Input() {
 void Pong::Render() {
 	SDL_SetRenderDrawColor(mRenderer, 0x00, 0x00, 0x00, 0xFF);
 	SDL_RenderClear(mRenderer);
+
+	SDL_SetRenderDrawColor(mRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
+	SDL_RenderFillRect(mRenderer, &mPlayer1);
+	SDL_RenderFillRect(mRenderer, &mPlayer2);
+	SDL_RenderFillRect(mRenderer, &mBall);
+
 	SDL_RenderPresent(mRenderer);
 }
 
@@ -72,7 +81,7 @@ void Pong::Render() {
 void Pong::Cleanup() {
 	if (mRenderer) {
 		SDL_DestroyRenderer(mRenderer);
-		mWindow = nullptr;
+		mRenderer = nullptr;
 	}
 	if (mWindow) {
 		SDL_DestroyWindow(mWindow);
@@ -109,7 +118,17 @@ bool Pong::Init() {
 	return true;
 }
 
-Pong::Pong() : mRunning(false), mWindow(nullptr), mRenderer(nullptr) {}
+Pong::Pong()
+	: mRunning(false)
+	, mWindow(nullptr)
+	, mRenderer(nullptr)
+	, mPlayer1{ .x = PLAYER1_PADDLE_START_X, .y = PLAYER_PADDLE_START_Y,
+				.w = PLAYER_PADDLE_WIDTH, .h = PLAYER_PADDLE_HEIGHT }
+	, mPlayer2{ .x = PLAYER2_PADDLE_START_X, .y = PLAYER_PADDLE_START_Y,
+				.w = PLAYER_PADDLE_WIDTH, .h = PLAYER_PADDLE_HEIGHT }
+	, mBall{ .x = BALL_START_X, .y = BALL_START_Y,
+				.w = BALL_SIZE, .h = BALL_SIZE }
+{}
 
 Pong::~Pong() {
 	Cleanup();
