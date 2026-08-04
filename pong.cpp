@@ -3,12 +3,30 @@
 
 #include "pong.h"
 
+struct Player {
+	float mX;
+	float mY;
+	SDL_Gamepad* mPad;
+	Player(float x, float y);
+	SDL_FRect GetFRect();
+};
+
+Player::Player(float x, float y): mX(x), mY(y), mPad(nullptr){}
+
+SDL_FRect Player::GetFRect() {
+	return {
+		.x = mX,
+		.y = mY,
+		.w = PLAYER_PADDLE_WIDTH,
+		.h = PLAYER_PADDLE_HEIGHT,
+	};
+}
+
 class Pong {
 	bool mRunning;
 	SDL_Window* mWindow;
 	SDL_Renderer* mRenderer;
-	SDL_FRect mPlayer1;
-	SDL_FRect mPlayer2;
+	Player mPlayers[MAX_PLAYERS];
 	SDL_FRect mBall;
 
 	void MainLoop();
@@ -16,6 +34,9 @@ class Pong {
 	void EventLoop();
 	void Render();
 	void Cleanup();
+	void AddPad(SDL_JoystickID id);
+	void RemovePad(SDL_JoystickID id);
+	void ToggleJoin(SDL_JoystickID id);
 
 public:
 	Pong();
@@ -59,19 +80,76 @@ void Pong::EventLoop() {
 		case SDL_EVENT_QUIT:
 			mRunning = false;
 			break;
+		case SDL_EVENT_GAMEPAD_ADDED:
+			AddPad(event.gdevice.which);
+			break;
+		case SDL_EVENT_GAMEPAD_REMOVED:
+			RemovePad(event.gdevice.which);
+			break;
+		case SDL_EVENT_GAMEPAD_BUTTON_DOWN:
+			if (event.gbutton.button == SDL_GAMEPAD_BUTTON_START) {
+				ToggleJoin(event.gdevice.which);
+			}
+			break;
 		default:
 			break;
 		}
 	}
 }
 
+void Pong::AddPad(SDL_JoystickID id) {
+	SDL_OpenGamepad(id);
+}
+
+void Pong::RemovePad(SDL_JoystickID id) {
+	for (Player& p : mPlayers) {
+		if (p.mPad && SDL_GetGamepadID(p.mPad) == id) {
+			p.mPad = nullptr;
+		}
+	}
+	SDL_Gamepad* pad = SDL_GetGamepadFromID(id);
+	if (pad) {
+		SDL_CloseGamepad(pad);
+	}
+}
+
+void Pong::ToggleJoin(SDL_JoystickID id) {
+	SDL_Gamepad* pad = SDL_GetGamepadFromID(id);
+	if (!pad) return;
+
+	for (Player& p : mPlayers) {
+		if (p.mPad == pad) {
+			p.mPad = nullptr;
+			return;
+		}
+	}
+
+	for (Player& p : mPlayers) {
+		if (!p.mPad) {
+			p.mPad = pad;
+			return;
+		}
+	}
+}
+
 void Pong::Render() {
-	SDL_SetRenderDrawColor(mRenderer, 0x00, 0x00, 0x00, 0xFF);
+	Uint8 color = BG_COLOR;
+	SDL_SetRenderDrawColor(mRenderer, color, color, color, 0xFF);
 	SDL_RenderClear(mRenderer);
 
-	SDL_SetRenderDrawColor(mRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
-	SDL_RenderFillRect(mRenderer, &mPlayer1);
-	SDL_RenderFillRect(mRenderer, &mPlayer2);
+	for (Player p : mPlayers) {
+		SDL_FRect pRect = p.GetFRect();
+		if (p.mPad) {
+			color = JOINED_COLOR;
+		}
+		else {
+			color = LEFT_COLOR;
+		}
+		SDL_SetRenderDrawColor(mRenderer, color, color, color, 0xFF);
+		SDL_RenderFillRect(mRenderer, &pRect);
+	}
+	color = FG_COLOR;
+	SDL_SetRenderDrawColor(mRenderer, color, color, color, 0xFF);
 	SDL_RenderFillRect(mRenderer, &mBall);
 
 	SDL_RenderPresent(mRenderer);
@@ -91,7 +169,7 @@ void Pong::Cleanup() {
 }
 
 bool Pong::Init() {
-	if (!SDL_Init(SDL_INIT_VIDEO))
+	if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_GAMEPAD))
 	{
 		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Error", "SDL Could not initialise the video!", nullptr);
 		Cleanup();
@@ -122,10 +200,10 @@ Pong::Pong()
 	: mRunning(false)
 	, mWindow(nullptr)
 	, mRenderer(nullptr)
-	, mPlayer1{ .x = PLAYER1_PADDLE_START_X, .y = PLAYER_PADDLE_START_Y,
-				.w = PLAYER_PADDLE_WIDTH, .h = PLAYER_PADDLE_HEIGHT }
-	, mPlayer2{ .x = PLAYER2_PADDLE_START_X, .y = PLAYER_PADDLE_START_Y,
-				.w = PLAYER_PADDLE_WIDTH, .h = PLAYER_PADDLE_HEIGHT }
+	, mPlayers{
+		Player(PLAYER1_PADDLE_START_X, PLAYER_PADDLE_START_Y),
+		Player(PLAYER2_PADDLE_START_X, PLAYER_PADDLE_START_Y)
+	}
 	, mBall{ .x = BALL_START_X, .y = BALL_START_Y,
 				.w = BALL_SIZE, .h = BALL_SIZE }
 {}
