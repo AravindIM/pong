@@ -13,7 +13,7 @@ class Pong {
 
 	void MainLoop();
 	void Tick();
-	void Input();
+	void EventLoop();
 	void Render();
 	void Cleanup();
 
@@ -48,11 +48,11 @@ void Pong::MainLoop() {
 }
 
 void Pong::Tick() {
-	Input();
+	EventLoop();
 	Render();
 }
 
-void Pong::Input() {
+void Pong::EventLoop() {
 	SDL_Event event;
 	while (SDL_PollEvent(&event)) {
 		switch (event.type) {
