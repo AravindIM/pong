@@ -4,12 +4,14 @@
 #include "pong.h"
 
 class Pong {
-	SDL_Window* mWindow;
 	bool mRunning;
+	SDL_Window* mWindow;
+	SDL_Renderer* mRenderer;
 
 	void MainLoop();
 	void Tick();
 	void Input();
+	void Render();
 	void Cleanup();
 
 public:
@@ -44,6 +46,7 @@ void Pong::MainLoop() {
 
 void Pong::Tick() {
 	Input();
+	Render();
 }
 
 void Pong::Input() {
@@ -59,8 +62,18 @@ void Pong::Input() {
 	}
 }
 
+void Pong::Render() {
+	SDL_SetRenderDrawColor(mRenderer, 0x00, 0x00, 0x00, 0xFF);
+	SDL_RenderClear(mRenderer);
+	SDL_RenderPresent(mRenderer);
+}
+
 
 void Pong::Cleanup() {
+	if (mRenderer) {
+		SDL_DestroyRenderer(mRenderer);
+		mWindow = nullptr;
+	}
 	if (mWindow) {
 		SDL_DestroyWindow(mWindow);
 		mWindow = nullptr;
@@ -71,21 +84,32 @@ void Pong::Cleanup() {
 bool Pong::Init() {
 	if (!SDL_Init(SDL_INIT_VIDEO))
 	{
-		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Error", SDL_GetError(), nullptr);
+		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Error", "SDL Could not initialise the video!", nullptr);
 		Cleanup();
 		return false;
 	}
 	mWindow = SDL_CreateWindow("Pong", WINDOW_WIDTH, WINDOW_HEIGHT, SDL_WINDOW_RESIZABLE);
 	if (!mWindow)
 	{
-		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Error", SDL_GetError(), nullptr);
+		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Error", "SDL Could not create the window!", nullptr);
+		Cleanup();
+		return false;
+	}
+	mRenderer = SDL_CreateRenderer(mWindow, nullptr);
+	if (!mRenderer) {
+		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Error", "SDL Could not create renderer!", nullptr);
+		Cleanup();
+		return false;
+	}
+	if (!SDL_SetRenderLogicalPresentation(mRenderer, WINDOW_WIDTH, WINDOW_HEIGHT, SDL_LOGICAL_PRESENTATION_INTEGER_SCALE)) {
+		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Error", "SDL Could not scale to the display!", nullptr);
 		Cleanup();
 		return false;
 	}
 	return true;
 }
 
-Pong::Pong() : mWindow(nullptr), mRunning(false) {}
+Pong::Pong() : mRunning(false), mWindow(nullptr), mRenderer(nullptr) {}
 
 Pong::~Pong() {
 	Cleanup();
