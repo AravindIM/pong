@@ -22,12 +22,71 @@ SDL_FRect Player::GetFRect() {
 	};
 }
 
+class Metronome {
+	int mFrames;
+	Uint64 mStartTime;
+	Uint64 mFrameStartTime;
+	Uint64 mElapsed;
+	int mFPS;
+
+public:
+	Metronome();
+	void Start();
+	void RecordFrameStart();
+	void RecordFrameEnd();
+	void Stop();
+	int GetFPS();
+	Uint64 GetFrameDelta();
+	Uint64 GetDelta();
+};
+
+Metronome::Metronome()
+	: mFrames(0)
+	, mStartTime(0)
+	, mFrameStartTime(0)
+	, mElapsed(0)
+	, mFPS(0)
+{}
+
+void Metronome::Start() {
+	mStartTime = SDL_GetTicksNS();
+}
+void Metronome::RecordFrameStart() {
+	mFrameStartTime = SDL_GetTicksNS();
+}
+
+void Metronome::RecordFrameEnd() {
+	mElapsed += GetFrameDelta();
+	mFrames++;
+}
+
+void Metronome::Stop() {
+	mFPS = (int)(mFrames * SDL_NS_PER_SECOND / mElapsed);
+	mElapsed = 0;
+	mFrames = 0;
+	mStartTime = SDL_GetTicksNS();
+}
+
+int Metronome::GetFPS() {
+	return mFPS;
+}
+
+Uint64 Metronome::GetFrameDelta() {
+	return SDL_GetTicksNS() - mFrameStartTime;
+}
+
+Uint64 Metronome::GetDelta() {
+	return SDL_GetTicksNS() - mStartTime;
+}
+
+
 class Pong {
 	bool mRunning;
 	SDL_Window* mWindow;
 	SDL_Renderer* mRenderer;
 	Player mPlayers[MAX_PLAYERS];
 	SDL_FRect mBall;
+	Metronome mMetronome;
 
 	void MainLoop();
 	void Tick();
@@ -47,20 +106,17 @@ public:
 };
 
 void Pong::MainLoop() {
-	Uint64 fps = 0;
-	Uint64 lastTime = SDL_GetTicks();
-	Uint64 frameStart;
+	mMetronome.Start();
 	while (mRunning) {
-		frameStart = SDL_GetTicks();
+		mMetronome.RecordFrameStart();
 		Tick();
-		fps++;
-		if (frameStart > lastTime + SECOND_IN_MS) {
-			std::string title = "Pong: ";
-			title += std::to_string(fps);
-			title += " FPS";
+		mMetronome.RecordFrameEnd();
+		if (mMetronome.GetDelta() > SDL_NS_PER_SECOND) {
+			mMetronome.Stop();
+			std::string title = "Pong [";
+			title += std::to_string(mMetronome.GetFPS());
+			title += " FPS]";
 			SDL_SetWindowTitle(mWindow, title.c_str());
-			lastTime = frameStart;
-			fps = 0;
 		}
 	}
 }
@@ -218,6 +274,7 @@ Pong::Pong()
 	}
 	, mBall{ .x = BALL_START_X, .y = BALL_START_Y,
 				.w = BALL_SIZE, .h = BALL_SIZE }
+	,mMetronome()
 {}
 
 Pong::~Pong() {
