@@ -32,6 +32,7 @@ class Pong {
 	void MainLoop();
 	void Tick();
 	void EventLoop();
+	void Update();
 	void Render();
 	void Cleanup();
 	void AddPad(SDL_JoystickID id);
@@ -70,6 +71,7 @@ void Pong::MainLoop() {
 
 void Pong::Tick() {
 	EventLoop();
+	Update();
 	Render();
 }
 
@@ -93,6 +95,20 @@ void Pong::EventLoop() {
 			break;
 		default:
 			break;
+		}
+	}
+}
+
+void Pong::Update() {
+	for (Player& p : mPlayers) {
+		if (p.mPad) {
+			Sint16 yAxis = SDL_GetGamepadAxis(p.mPad, SDL_GAMEPAD_AXIS_LEFTY);
+			if (yAxis < JOYSTICK_TOP_DEAD_ZONE && p.mY > PLAYER_PADDLE_MIN_Y) {
+				p.mY-= PLAYER_PADDLE_SPEED;
+			}
+			else if (yAxis > JOYSTICK_BOTTOM_DEADZONE && p.mY < PLAYER_PADDLE_MAX_Y) {
+				p.mY += PLAYER_PADDLE_SPEED;
+			}
 		}
 	}
 }
