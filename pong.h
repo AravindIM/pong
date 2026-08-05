@@ -9,7 +9,6 @@
 
 #define WINDOW_WIDTH 800
 #define WINDOW_HEIGHT 600
-#define FRAME_RATE 30
 #define SECOND_IN_MS 1000
 #define FRAME_TIME ( SECOND_IN_MS / FRAME_RATE )
 #define MAX_PLAYERS 2
@@ -29,5 +28,6 @@
 #define JOINED_COLOR 0xFF
 #define LEFT_COLOR 0x55
 #define JOYSTICK_DEADZONE 1000
+#define VSYNC_ENABLED 1
 
 // TODO: Reference additional headers your program requires here.

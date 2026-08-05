@@ -49,7 +49,7 @@ public:
 void Pong::MainLoop() {
 	Uint64 fps = 0;
 	Uint64 lastTime = SDL_GetTicks();
-	Uint64 frameStart, elapsed;
+	Uint64 frameStart;
 	while (mRunning) {
 		frameStart = SDL_GetTicks();
 		Tick();
@@ -61,10 +61,6 @@ void Pong::MainLoop() {
 			SDL_SetWindowTitle(mWindow, title.c_str());
 			lastTime = frameStart;
 			fps = 0;
-		}
-		elapsed = SDL_GetTicks() - frameStart;
-		if (elapsed < FRAME_TIME) {
-			SDL_Delay(static_cast<Uint32>(FRAME_TIME - elapsed));
 		}
 	}
 }
@@ -200,6 +196,9 @@ bool Pong::Init() {
 		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Error", "SDL Could not create renderer!", nullptr);
 		Cleanup();
 		return false;
+	}
+	if (!SDL_SetRenderVSync(mRenderer, SDL_RENDERER_VSYNC_ADAPTIVE)) {
+		SDL_SetRenderVSync(mRenderer, VSYNC_ENABLED);
 	}
 	if (!SDL_SetRenderLogicalPresentation(mRenderer, WINDOW_WIDTH, WINDOW_HEIGHT, SDL_LOGICAL_PRESENTATION_INTEGER_SCALE)) {
 		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Error", "SDL Could not scale to the display!", nullptr);
