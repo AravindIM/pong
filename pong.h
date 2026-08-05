@@ -28,7 +28,6 @@
 #define FG_COLOR 0xFF
 #define JOINED_COLOR 0xFF
 #define LEFT_COLOR 0x55
-#define JOYSTICK_TOP_DEAD_ZONE -1000
-#define JOYSTICK_BOTTOM_DEADZONE 1000
+#define JOYSTICK_DEADZONE 1000
 
 // TODO: Reference additional headers your program requires here.

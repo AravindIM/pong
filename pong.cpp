@@ -103,12 +103,9 @@ void Pong::Update() {
 	for (Player& p : mPlayers) {
 		if (p.mPad) {
 			Sint16 yAxis = SDL_GetGamepadAxis(p.mPad, SDL_GAMEPAD_AXIS_LEFTY);
-			if (yAxis < JOYSTICK_TOP_DEAD_ZONE && p.mY > PLAYER_PADDLE_MIN_Y) {
-				p.mY-= PLAYER_PADDLE_SPEED;
-			}
-			else if (yAxis > JOYSTICK_BOTTOM_DEADZONE && p.mY < PLAYER_PADDLE_MAX_Y) {
-				p.mY += PLAYER_PADDLE_SPEED;
-			}
+			if (SDL_abs(yAxis) < JOYSTICK_DEADZONE) continue;
+			if (p.mY > PLAYER_PADDLE_MIN_Y) p.mY-= PLAYER_PADDLE_SPEED;
+			if (p.mY < PLAYER_PADDLE_MAX_Y) p.mY += PLAYER_PADDLE_SPEED;
 		}
 	}
 }
