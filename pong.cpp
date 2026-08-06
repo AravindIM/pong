@@ -9,6 +9,8 @@ struct Player {
 	SDL_Gamepad* mPad;
 	Player(float x, float y);
 	SDL_FRect GetFRect();
+	void Up(double deltaTime);
+	void Down(double deltaTime);
 };
 
 Player::Player(float x, float y): mX(x), mY(y), mPad(nullptr){}
@@ -20,6 +22,22 @@ SDL_FRect Player::GetFRect() {
 		.w = PLAYER_PADDLE_WIDTH,
 		.h = PLAYER_PADDLE_HEIGHT,
 	};
+}
+
+void Player::Up(double deltaTime) {
+	if (mY <= PLAYER_PADDLE_MIN_Y) {
+		mY = PLAYER_PADDLE_MIN_Y;
+		return;
+	}
+	mY -= (float)(PLAYER_PADDLE_SPEED * deltaTime);
+}
+
+void Player::Down(double deltaTime) {
+	if (mY >= PLAYER_PADDLE_MAX_Y) {
+		mY = PLAYER_PADDLE_MAX_Y;
+		return;
+	}
+	mY += (float)(PLAYER_PADDLE_SPEED * deltaTime);
 }
 
 class Clock {
@@ -173,8 +191,8 @@ void Pong::Update() {
 		if (p.mPad) {
 			Sint16 yAxis = SDL_GetGamepadAxis(p.mPad, SDL_GAMEPAD_AXIS_LEFTY);
 			if (SDL_abs(yAxis) < JOYSTICK_DEADZONE) continue;
-			if (yAxis < 0 && p.mY > PLAYER_PADDLE_MIN_Y) p.mY-= (float)(PLAYER_PADDLE_SPEED * deltaTime);
-			if (yAxis > 0 && p.mY < PLAYER_PADDLE_MAX_Y) p.mY += (float)(PLAYER_PADDLE_SPEED * deltaTime);
+			if (yAxis < 0) p.Up(deltaTime);
+			if (yAxis > 0) p.Down(deltaTime);
 		}
 	}
 }
