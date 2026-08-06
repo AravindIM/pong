@@ -22,6 +22,24 @@ SDL_FRect Player::GetFRect() {
 	};
 }
 
+class Clock {
+	Uint64 mStartTime;
+public:
+	Clock();
+	void Reset();
+	double GetDTSec();
+};
+
+Clock::Clock(): mStartTime(0) {}
+
+void Clock::Reset() {
+	mStartTime = SDL_GetTicksNS();
+}
+
+double Clock::GetDTSec() {
+	return (double)(SDL_GetTicksNS() - mStartTime) / SDL_NS_PER_SECOND;
+}
+
 class FPSCalculator {
 	int mFrames;
 	Uint64 mStartTime;
@@ -82,6 +100,7 @@ class Pong {
 	SDL_Renderer* mRenderer;
 	Player mPlayers[MAX_PLAYERS];
 	SDL_FRect mBall;
+	Clock mClock;
 
 	void MainLoop();
 	void Tick();
@@ -102,6 +121,7 @@ public:
 
 void Pong::MainLoop() {
 	FPSCalculator fpsCalc;
+	mClock.Reset();
 	fpsCalc.Reset();
 	while (mRunning) {
 		fpsCalc.FrameStart();
@@ -147,12 +167,14 @@ void Pong::EventLoop() {
 }
 
 void Pong::Update() {
+	double deltaTime = mClock.GetDTSec();
+	mClock.Reset();
 	for (Player& p : mPlayers) {
 		if (p.mPad) {
 			Sint16 yAxis = SDL_GetGamepadAxis(p.mPad, SDL_GAMEPAD_AXIS_LEFTY);
 			if (SDL_abs(yAxis) < JOYSTICK_DEADZONE) continue;
-			if (yAxis < 0 && p.mY > PLAYER_PADDLE_MIN_Y) p.mY-= PLAYER_PADDLE_SPEED;
-			if (yAxis > 0 && p.mY < PLAYER_PADDLE_MAX_Y) p.mY += PLAYER_PADDLE_SPEED;
+			if (yAxis < 0 && p.mY > PLAYER_PADDLE_MIN_Y) p.mY-= (float)(PLAYER_PADDLE_SPEED * deltaTime);
+			if (yAxis > 0 && p.mY < PLAYER_PADDLE_MAX_Y) p.mY += (float)(PLAYER_PADDLE_SPEED * deltaTime);
 		}
 	}
 }
