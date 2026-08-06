@@ -22,7 +22,7 @@ SDL_FRect Player::GetFRect() {
 	};
 }
 
-class Metronome {
+class FPSCalculator {
 	int mFrames;
 	Uint64 mStartTime;
 	Uint64 mFrameStartTime;
@@ -30,17 +30,16 @@ class Metronome {
 	int mFPS;
 
 public:
-	Metronome();
-	void Start();
-	void RecordFrameStart();
-	void RecordFrameEnd();
-	void Stop();
+	FPSCalculator();
+	void Reset();
+	void FrameStart();
+	void FrameEnd();
 	int GetFPS();
-	Uint64 GetFrameDelta();
-	Uint64 GetDelta();
+	Uint64 GetFrameDT();
+	Uint64 GetDT();
 };
 
-Metronome::Metronome()
+FPSCalculator::FPSCalculator()
 	: mFrames(0)
 	, mStartTime(0)
 	, mFrameStartTime(0)
@@ -48,34 +47,31 @@ Metronome::Metronome()
 	, mFPS(0)
 {}
 
-void Metronome::Start() {
+void FPSCalculator::Reset() {
 	mStartTime = SDL_GetTicksNS();
 }
-void Metronome::RecordFrameStart() {
+void FPSCalculator::FrameStart() {
 	mFrameStartTime = SDL_GetTicksNS();
 }
 
-void Metronome::RecordFrameEnd() {
-	mElapsed += GetFrameDelta();
+void FPSCalculator::FrameEnd() {
+	mElapsed += GetFrameDT();
 	mFrames++;
 }
 
-void Metronome::Stop() {
+int FPSCalculator::GetFPS() {
 	mFPS = (int)(mFrames * SDL_NS_PER_SECOND / mElapsed);
 	mElapsed = 0;
 	mFrames = 0;
 	mStartTime = SDL_GetTicksNS();
-}
-
-int Metronome::GetFPS() {
 	return mFPS;
 }
 
-Uint64 Metronome::GetFrameDelta() {
+Uint64 FPSCalculator::GetFrameDT() {
 	return SDL_GetTicksNS() - mFrameStartTime;
 }
 
-Uint64 Metronome::GetDelta() {
+Uint64 FPSCalculator::GetDT() {
 	return SDL_GetTicksNS() - mStartTime;
 }
 
@@ -86,7 +82,6 @@ class Pong {
 	SDL_Renderer* mRenderer;
 	Player mPlayers[MAX_PLAYERS];
 	SDL_FRect mBall;
-	Metronome mMetronome;
 
 	void MainLoop();
 	void Tick();
@@ -106,15 +101,15 @@ public:
 };
 
 void Pong::MainLoop() {
-	mMetronome.Start();
+	FPSCalculator fpsCalc;
+	fpsCalc.Reset();
 	while (mRunning) {
-		mMetronome.RecordFrameStart();
+		fpsCalc.FrameStart();
 		Tick();
-		mMetronome.RecordFrameEnd();
-		if (mMetronome.GetDelta() > SDL_NS_PER_SECOND) {
-			mMetronome.Stop();
+		fpsCalc.FrameEnd();
+		if (fpsCalc.GetDT() > SDL_NS_PER_SECOND) {
 			std::string title = "Pong [";
-			title += std::to_string(mMetronome.GetFPS());
+			title += std::to_string(fpsCalc.GetFPS());
 			title += " FPS]";
 			SDL_SetWindowTitle(mWindow, title.c_str());
 		}
@@ -274,7 +269,6 @@ Pong::Pong()
 	}
 	, mBall{ .x = BALL_START_X, .y = BALL_START_Y,
 				.w = BALL_SIZE, .h = BALL_SIZE }
-	,mMetronome()
 {}
 
 Pong::~Pong() {
