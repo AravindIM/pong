@@ -40,6 +40,49 @@ void Player::Down(double deltaTime) {
 	mY += (float)(PLAYER_PADDLE_SPEED * deltaTime);
 }
 
+class Ball {
+	float mX;
+	float mY;
+	float mW;
+	float mH;
+	float vX;
+	float vY;
+public:
+	Ball();
+	SDL_FRect GetFRect();
+	void Move(double deltaTime);
+};
+
+Ball::Ball()
+	: mX(BALL_START_X)
+	, mY(BALL_START_Y)
+	, mW(BALL_SIZE)
+	, mH(BALL_SIZE)
+	, vX(BALL_START_VX)
+	, vY(BALL_START_VY) {}
+
+SDL_FRect Ball::GetFRect() {
+	return {
+		.x = mX,
+		.y = mY,
+		.w = mW,
+		.h = mH,
+	};
+}
+
+void Ball::Move(double deltaTime) {
+	if (mX <= BALL_MIN_X) {
+		mX = BALL_MIN_X;
+		return;
+	}
+	if (mX >= BALL_MAX_X) {
+		mX = BALL_MAX_X;
+		return;
+	}
+	mX -= (float)(vX * deltaTime);
+	mY -= (float)(vY * deltaTime);
+}
+
 class Clock {
 	Uint64 mStartTime;
 public:
