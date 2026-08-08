@@ -51,6 +51,8 @@ public:
 	Ball();
 	SDL_FRect GetFRect();
 	void Move(double deltaTime);
+	void PaddleBounce();
+	void WallBounce();
 };
 
 Ball::Ball()
@@ -79,8 +81,24 @@ void Ball::Move(double deltaTime) {
 		mX = BALL_MAX_X;
 		return;
 	}
+	if (mY <= BALL_MIN_Y) {
+		mY = BALL_MIN_Y;
+		WallBounce();
+	}
+	if (mY >= BALL_MAX_Y) {
+		mY = BALL_MAX_Y;
+		WallBounce();
+	}
 	mX -= (float)(vX * deltaTime);
 	mY -= (float)(vY * deltaTime);
+}
+
+void Ball::PaddleBounce() {
+	vX *= -1;
+}
+
+void Ball::WallBounce() {
+	vY *= -1;
 }
 
 class Clock {

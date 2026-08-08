@@ -26,6 +26,8 @@
 #define BALL_START_VY 30
 #define BALL_MIN_X 0
 #define BALL_MAX_X (WINDOW_WIDTH - BALL_SIZE)
+#define BALL_MIN_Y 0
+#define BALL_MAX_Y (WINDOW_HEIGHT - BALL_SIZE)
 #define BG_COLOR 0x00
 #define FG_COLOR 0xFF
 #define JOINED_COLOR 0xFF
