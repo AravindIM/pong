@@ -6,6 +6,8 @@
 struct Player {
 	float mX;
 	float mY;
+	float mW;
+	float mH;
 	SDL_Gamepad* mPad;
 	Player(float x, float y);
 	SDL_FRect GetFRect();
@@ -13,14 +15,19 @@ struct Player {
 	void Down(double deltaTime);
 };
 
-Player::Player(float x, float y): mX(x), mY(y), mPad(nullptr){}
+Player::Player(float x, float y)
+	:mX(x)
+	, mY(y)
+	, mW(PLAYER_PADDLE_WIDTH)
+	, mH(PLAYER_PADDLE_HEIGHT)
+	, mPad(nullptr){}
 
 SDL_FRect Player::GetFRect() {
 	return {
 		.x = mX,
 		.y = mY,
-		.w = PLAYER_PADDLE_WIDTH,
-		.h = PLAYER_PADDLE_HEIGHT,
+		.w = mW,
+		.h = mH,
 	};
 }
 
