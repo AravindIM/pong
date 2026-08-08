@@ -160,7 +160,7 @@ class Pong {
 	SDL_Window* mWindow;
 	SDL_Renderer* mRenderer;
 	Player mPlayers[MAX_PLAYERS];
-	SDL_FRect mBall;
+	Ball mBall;
 	Clock mClock;
 
 	void MainLoop();
@@ -238,6 +238,7 @@ void Pong::Update() {
 			if (yAxis > 0) p.Down(deltaTime);
 		}
 	}
+	mBall.Move(deltaTime);
 }
 
 void Pong::AddPad(SDL_JoystickID id) {
@@ -292,8 +293,9 @@ void Pong::Render() {
 		SDL_RenderFillRect(mRenderer, &pRect);
 	}
 	color = FG_COLOR;
+	SDL_FRect bRect = mBall.GetFRect();
 	SDL_SetRenderDrawColor(mRenderer, color, color, color, 0xFF);
-	SDL_RenderFillRect(mRenderer, &mBall);
+	SDL_RenderFillRect(mRenderer, &bRect);
 
 	SDL_RenderPresent(mRenderer);
 }
@@ -350,8 +352,7 @@ Pong::Pong()
 		Player(PLAYER1_PADDLE_START_X, PLAYER_PADDLE_START_Y),
 		Player(PLAYER2_PADDLE_START_X, PLAYER_PADDLE_START_Y)
 	}
-	, mBall{ .x = BALL_START_X, .y = BALL_START_Y,
-				.w = BALL_SIZE, .h = BALL_SIZE }
+	, mBall()
 {}
 
 Pong::~Pong() {
