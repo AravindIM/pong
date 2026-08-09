@@ -288,7 +288,7 @@ void Pong::Render() {
 	SDL_SetRenderDrawColor(mRenderer, color, color, color, 0xFF);
 	SDL_RenderClear(mRenderer);
 
-	for (const Player p : mPlayers) {
+	for (const Player& p : mPlayers) {
 		SDL_FRect pRect = p.mRect;
 		if (p.mPad) {
 			color = JOINED_COLOR;
