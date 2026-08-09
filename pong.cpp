@@ -289,7 +289,6 @@ void Pong::Render() {
 	SDL_RenderClear(mRenderer);
 
 	for (const Player& p : mPlayers) {
-		SDL_FRect pRect = p.mRect;
 		if (p.mPad) {
 			color = JOINED_COLOR;
 		}
@@ -297,13 +296,12 @@ void Pong::Render() {
 			color = LEFT_COLOR;
 		}
 		SDL_SetRenderDrawColor(mRenderer, color, color, color, 0xFF);
-		SDL_RenderFillRect(mRenderer, &pRect);
+		SDL_RenderFillRect(mRenderer, &p.mRect);
 	}
 
-	color = FG_COLOR;
-	SDL_FRect bRect = mBall.mRect;
+	color = FG_COLOR;;
 	SDL_SetRenderDrawColor(mRenderer, color, color, color, 0xFF);
-	SDL_RenderFillRect(mRenderer, &bRect);
+	SDL_RenderFillRect(mRenderer, &mBall.mRect);
 
 	SDL_RenderPresent(mRenderer);
 }
