@@ -3,6 +3,10 @@
 
 #include "pong.h"
 
+enum Direction {
+	UP = -1,
+	DOWN = 1
+};
 enum CollisionEdge {
 	COLLIDE_LEFT,
 	COLLIDE_RIGHT
@@ -13,8 +17,7 @@ struct Player {
 	CollisionEdge mEdge;
 	SDL_Gamepad* mPad;
 	Player(float x, float y, CollisionEdge collisionEdge);
-	void Up(double deltaTime);
-	void Down(double deltaTime);
+	void Move(Direction dir, double deltaTime);
 };
 
 Player::Player(float x, float y, CollisionEdge collisionEdge)
@@ -22,20 +25,9 @@ Player::Player(float x, float y, CollisionEdge collisionEdge)
 	, mEdge(collisionEdge)
 	, mPad(nullptr){}
 
-void Player::Up(double deltaTime) {
-	if (mRect.y <= PLAYER_PADDLE_MIN_Y) {
-		mRect.y = PLAYER_PADDLE_MIN_Y;
-		return;
-	}
-	mRect.y -= (float)(PLAYER_PADDLE_SPEED * deltaTime);
-}
-
-void Player::Down(double deltaTime) {
-	if (mRect.y >= PLAYER_PADDLE_MAX_Y) {
-		mRect.y = PLAYER_PADDLE_MAX_Y;
-		return;
-	}
-	mRect.y += (float)(PLAYER_PADDLE_SPEED * deltaTime);
+void Player::Move(Direction dir, double deltaTime) {
+	float dy = (float)(PLAYER_PADDLE_SPEED * deltaTime);
+	mRect.y = SDL_clamp(mRect.y + (float)dir * dy, PLAYER_PADDLE_MIN_Y, PLAYER_PADDLE_MAX_Y);
 }
 
 struct Ball {
@@ -234,8 +226,8 @@ void Pong::Update() {
 		if (p.mPad) {
 			Sint16 yAxis = SDL_GetGamepadAxis(p.mPad, SDL_GAMEPAD_AXIS_LEFTY);
 			if (SDL_abs(yAxis) >= JOYSTICK_DEADZONE) {
-				if (yAxis < 0) p.Up(deltaTime);
-				if (yAxis > 0) p.Down(deltaTime);
+				if (yAxis < 0) p.Move(UP, deltaTime);
+				if (yAxis > 0) p.Move(DOWN, deltaTime);
 			}
 			if (DetectCollision(p, mBall)) {
 				mBall.PaddleBounce();
