@@ -3,23 +3,30 @@
 
 #include "pong.h"
 
+enum CollisionEdge {
+	COLLIDE_LEFT,
+	COLLIDE_RIGHT
+};
+
 struct Player {
 	float mX;
 	float mY;
 	float mW;
 	float mH;
+	CollisionEdge mEdge;
 	SDL_Gamepad* mPad;
-	Player(float x, float y);
+	Player(float x, float y, CollisionEdge collisionEdge);
 	SDL_FRect GetFRect();
 	void Up(double deltaTime);
 	void Down(double deltaTime);
 };
 
-Player::Player(float x, float y)
-	:mX(x)
+Player::Player(float x, float y, CollisionEdge collisionEdge)
+	: mX(x)
 	, mY(y)
 	, mW(PLAYER_PADDLE_WIDTH)
 	, mH(PLAYER_PADDLE_HEIGHT)
+	, mEdge(collisionEdge)
 	, mPad(nullptr){}
 
 SDL_FRect Player::GetFRect() {
@@ -47,14 +54,13 @@ void Player::Down(double deltaTime) {
 	mY += (float)(PLAYER_PADDLE_SPEED * deltaTime);
 }
 
-class Ball {
+struct Ball {
 	float mX;
 	float mY;
 	float mW;
 	float mH;
 	float vX;
 	float vY;
-public:
 	Ball();
 	SDL_FRect GetFRect();
 	void Move(double deltaTime);
@@ -194,6 +200,7 @@ class Pong {
 	void Update();
 	void Render();
 	void Cleanup();
+	bool DetectCollision(Player p, Ball b);
 	void AddPad(SDL_JoystickID id);
 	void RemovePad(SDL_JoystickID id);
 	void ToggleJoin(SDL_JoystickID id);
@@ -258,9 +265,13 @@ void Pong::Update() {
 	for (Player& p : mPlayers) {
 		if (p.mPad) {
 			Sint16 yAxis = SDL_GetGamepadAxis(p.mPad, SDL_GAMEPAD_AXIS_LEFTY);
-			if (SDL_abs(yAxis) < JOYSTICK_DEADZONE) continue;
-			if (yAxis < 0) p.Up(deltaTime);
-			if (yAxis > 0) p.Down(deltaTime);
+			if (SDL_abs(yAxis) >= JOYSTICK_DEADZONE) {
+				if (yAxis < 0) p.Up(deltaTime);
+				if (yAxis > 0) p.Down(deltaTime);
+			}
+			if (DetectCollision(p, mBall)) {
+				mBall.PaddleBounce();
+			}
 		}
 	}
 	mBall.Move(deltaTime);
@@ -301,6 +312,22 @@ void Pong::ToggleJoin(SDL_JoystickID id) {
 	}
 }
 
+bool Pong::DetectCollision(Player p, Ball b) {
+	switch (p.mEdge) {
+	case COLLIDE_LEFT:
+		if ((b.mX + b.mW) >= p.mX && (b.mY + b.mH - COLLISION_ERROR) >= p.mY && b.mY <= (p.mY + p.mH - COLLISION_ERROR))
+			return true;
+		break;
+	case COLLIDE_RIGHT:
+		if (b.mX <= (p.mX + p.mW) && (b.mY + b.mH - COLLISION_ERROR) >= p.mY && b.mY <= (p.mY + p.mH - COLLISION_ERROR))
+			return true;
+		break;
+	default:
+		break;
+	}
+	return false;
+}
+
 void Pong::Render() {
 	Uint8 color = BG_COLOR;
 	SDL_SetRenderDrawColor(mRenderer, color, color, color, 0xFF);
@@ -317,6 +344,7 @@ void Pong::Render() {
 		SDL_SetRenderDrawColor(mRenderer, color, color, color, 0xFF);
 		SDL_RenderFillRect(mRenderer, &pRect);
 	}
+
 	color = FG_COLOR;
 	SDL_FRect bRect = mBall.GetFRect();
 	SDL_SetRenderDrawColor(mRenderer, color, color, color, 0xFF);
@@ -374,8 +402,8 @@ Pong::Pong()
 	, mWindow(nullptr)
 	, mRenderer(nullptr)
 	, mPlayers{
-		Player(PLAYER1_PADDLE_START_X, PLAYER_PADDLE_START_Y),
-		Player(PLAYER2_PADDLE_START_X, PLAYER_PADDLE_START_Y)
+		Player(PLAYER1_PADDLE_START_X, PLAYER_PADDLE_START_Y, COLLIDE_RIGHT),
+		Player(PLAYER2_PADDLE_START_X, PLAYER_PADDLE_START_Y, COLLIDE_LEFT)
 	}
 	, mBall()
 {}
