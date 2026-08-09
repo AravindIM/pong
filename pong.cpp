@@ -9,101 +9,69 @@ enum CollisionEdge {
 };
 
 struct Player {
-	float mX;
-	float mY;
-	float mW;
-	float mH;
+	SDL_FRect mRect;
 	CollisionEdge mEdge;
 	SDL_Gamepad* mPad;
 	Player(float x, float y, CollisionEdge collisionEdge);
-	SDL_FRect GetFRect();
 	void Up(double deltaTime);
 	void Down(double deltaTime);
 };
 
 Player::Player(float x, float y, CollisionEdge collisionEdge)
-	: mX(x)
-	, mY(y)
-	, mW(PLAYER_PADDLE_WIDTH)
-	, mH(PLAYER_PADDLE_HEIGHT)
+	: mRect(x, y, PLAYER_PADDLE_WIDTH, PLAYER_PADDLE_HEIGHT)
 	, mEdge(collisionEdge)
 	, mPad(nullptr){}
 
-SDL_FRect Player::GetFRect() {
-	return {
-		.x = mX,
-		.y = mY,
-		.w = mW,
-		.h = mH,
-	};
-}
-
 void Player::Up(double deltaTime) {
-	if (mY <= PLAYER_PADDLE_MIN_Y) {
-		mY = PLAYER_PADDLE_MIN_Y;
+	if (mRect.y <= PLAYER_PADDLE_MIN_Y) {
+		mRect.y = PLAYER_PADDLE_MIN_Y;
 		return;
 	}
-	mY -= (float)(PLAYER_PADDLE_SPEED * deltaTime);
+	mRect.y -= (float)(PLAYER_PADDLE_SPEED * deltaTime);
 }
 
 void Player::Down(double deltaTime) {
-	if (mY >= PLAYER_PADDLE_MAX_Y) {
-		mY = PLAYER_PADDLE_MAX_Y;
+	if (mRect.y >= PLAYER_PADDLE_MAX_Y) {
+		mRect.y = PLAYER_PADDLE_MAX_Y;
 		return;
 	}
-	mY += (float)(PLAYER_PADDLE_SPEED * deltaTime);
+	mRect.y += (float)(PLAYER_PADDLE_SPEED * deltaTime);
 }
 
 struct Ball {
-	float mX;
-	float mY;
-	float mW;
-	float mH;
+	SDL_FRect mRect;
 	float vX;
 	float vY;
 	Ball();
-	SDL_FRect GetFRect();
 	void Move(double deltaTime);
 	void PaddleBounce();
 	void WallBounce();
 };
 
 Ball::Ball()
-	: mX(BALL_START_X)
-	, mY(BALL_START_Y)
-	, mW(BALL_SIZE)
-	, mH(BALL_SIZE)
+	: mRect(BALL_START_X, BALL_START_Y,BALL_SIZE, BALL_SIZE)
 	, vX(BALL_START_VX)
 	, vY(BALL_START_VY) {}
 
-SDL_FRect Ball::GetFRect() {
-	return {
-		.x = mX,
-		.y = mY,
-		.w = mW,
-		.h = mH,
-	};
-}
-
 void Ball::Move(double deltaTime) {
-	if (mX <= BALL_MIN_X) {
-		mX = BALL_MIN_X;
+	if (mRect.x <= BALL_MIN_X) {
+		mRect.x = BALL_MIN_X;
 		return;
 	}
-	if (mX >= BALL_MAX_X) {
-		mX = BALL_MAX_X;
+	if (mRect.x >= BALL_MAX_X) {
+		mRect.x = BALL_MAX_X;
 		return;
 	}
-	if (mY <= BALL_MIN_Y) {
-		mY = BALL_MIN_Y;
+	if (mRect.y <= BALL_MIN_Y) {
+		mRect.y = BALL_MIN_Y;
 		WallBounce();
 	}
-	if (mY >= BALL_MAX_Y) {
-		mY = BALL_MAX_Y;
+	if (mRect.y >= BALL_MAX_Y) {
+		mRect.y = BALL_MAX_Y;
 		WallBounce();
 	}
-	mX -= (float)(vX * deltaTime);
-	mY -= (float)(vY * deltaTime);
+	mRect.x -= (float)(vX * deltaTime);
+	mRect.y -= (float)(vY * deltaTime);
 }
 
 void Ball::PaddleBounce() {
@@ -315,11 +283,11 @@ void Pong::ToggleJoin(SDL_JoystickID id) {
 bool Pong::DetectCollision(Player p, Ball b) {
 	switch (p.mEdge) {
 	case COLLIDE_LEFT:
-		if ((b.mX + b.mW) >= p.mX && (b.mY + b.mH - COLLISION_ERROR) >= p.mY && b.mY <= (p.mY + p.mH - COLLISION_ERROR))
+		if ((b.mRect.x + b.mRect.w) >= p.mRect.x && (b.mRect.y + b.mRect.h - COLLISION_ERROR) >= p.mRect.y && b.mRect.y <= (p.mRect.y + p.mRect.h - COLLISION_ERROR))
 			return true;
 		break;
 	case COLLIDE_RIGHT:
-		if (b.mX <= (p.mX + p.mW) && (b.mY + b.mH - COLLISION_ERROR) >= p.mY && b.mY <= (p.mY + p.mH - COLLISION_ERROR))
+		if (b.mRect.x <= (p.mRect.x + p.mRect.w) && (b.mRect.y + b.mRect.h - COLLISION_ERROR) >= p.mRect.y && b.mRect.y <= (p.mRect.y + p.mRect.h - COLLISION_ERROR))
 			return true;
 		break;
 	default:
@@ -334,7 +302,7 @@ void Pong::Render() {
 	SDL_RenderClear(mRenderer);
 
 	for (Player p : mPlayers) {
-		SDL_FRect pRect = p.GetFRect();
+		SDL_FRect pRect = p.mRect;
 		if (p.mPad) {
 			color = JOINED_COLOR;
 		}
@@ -346,7 +314,7 @@ void Pong::Render() {
 	}
 
 	color = FG_COLOR;
-	SDL_FRect bRect = mBall.GetFRect();
+	SDL_FRect bRect = mBall.mRect;
 	SDL_SetRenderDrawColor(mRenderer, color, color, color, 0xFF);
 	SDL_RenderFillRect(mRenderer, &bRect);
 
