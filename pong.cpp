@@ -134,7 +134,7 @@ class Pong {
 	void Update();
 	void Render();
 	void Cleanup();
-	void handleCollision();
+	void HandleCollision();
 	void AddPad(SDL_JoystickID id);
 	void RemovePad(SDL_JoystickID id);
 	void ToggleJoin(SDL_JoystickID id);
@@ -206,7 +206,7 @@ void Pong::Update() {
 		}
 	}
 	mBall.Move(deltaTime);
-	handleCollision();
+	HandleCollision();
 }
 
 void Pong::AddPad(SDL_JoystickID id) {
@@ -244,7 +244,7 @@ void Pong::ToggleJoin(SDL_JoystickID id) {
 	}
 }
 
-void Pong::handleCollision() {
+void Pong::HandleCollision() {
 	if (mBall.mRect.y <= BALL_MIN_Y) {
 		mBall.mRect.y = BALL_MIN_Y;
 		mBall.mVy *= -1;
