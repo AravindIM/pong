@@ -32,8 +32,8 @@ void Player::Move(Direction dir, double deltaTime) {
 
 struct Ball {
 	SDL_FRect mRect;
-	float vX;
-	float vY;
+	float mVx;
+	float mVy;
 	Ball();
 	void Move(double deltaTime);
 	void PaddleBounce();
@@ -42,18 +42,11 @@ struct Ball {
 
 Ball::Ball()
 	: mRect(BALL_START_X, BALL_START_Y,BALL_SIZE, BALL_SIZE)
-	, vX(BALL_START_VX)
-	, vY(BALL_START_VY) {}
+	, mVx(BALL_START_VX)
+	, mVy(BALL_START_VY) {}
 
 void Ball::Move(double deltaTime) {
-	if (mRect.x <= BALL_MIN_X) {
-		mRect.x = BALL_MIN_X;
-		return;
-	}
-	if (mRect.x >= BALL_MAX_X) {
-		mRect.x = BALL_MAX_X;
-		return;
-	}
+	float dx, dy;
 	if (mRect.y <= BALL_MIN_Y) {
 		mRect.y = BALL_MIN_Y;
 		WallBounce();
@@ -62,16 +55,18 @@ void Ball::Move(double deltaTime) {
 		mRect.y = BALL_MAX_Y;
 		WallBounce();
 	}
-	mRect.x -= (float)(vX * deltaTime);
-	mRect.y -= (float)(vY * deltaTime);
+	dx = (float)(mVx * deltaTime);
+	dy = (float)(mVy * deltaTime);
+	mRect.x = SDL_clamp(mRect.x + dx, BALL_MIN_X, BALL_MAX_X);
+	mRect.y = SDL_clamp(mRect.y + dy, BALL_MIN_Y, BALL_MAX_Y);
 }
 
 void Ball::PaddleBounce() {
-	vX *= -1;
+	mVx *= -1;
 }
 
 void Ball::WallBounce() {
-	vY *= -1;
+	mVy *= -1;
 }
 
 class Clock {
@@ -293,7 +288,7 @@ void Pong::Render() {
 	SDL_SetRenderDrawColor(mRenderer, color, color, color, 0xFF);
 	SDL_RenderClear(mRenderer);
 
-	for (Player p : mPlayers) {
+	for (const Player p : mPlayers) {
 		SDL_FRect pRect = p.mRect;
 		if (p.mPad) {
 			color = JOINED_COLOR;
