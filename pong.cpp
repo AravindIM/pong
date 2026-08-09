@@ -155,7 +155,7 @@ class Pong {
 	void Update();
 	void Render();
 	void Cleanup();
-	bool DetectCollision(Player p, Ball b);
+	bool DetectCollision(const Player& p, const Ball& b);
 	void AddPad(SDL_JoystickID id);
 	void RemovePad(SDL_JoystickID id);
 	void ToggleJoin(SDL_JoystickID id);
@@ -267,7 +267,7 @@ void Pong::ToggleJoin(SDL_JoystickID id) {
 	}
 }
 
-bool Pong::DetectCollision(Player p, Ball b) {
+bool Pong::DetectCollision(const Player& p, const Ball& b) {
 	switch (p.mEdge) {
 	case COLLIDE_LEFT:
 		if ((b.mRect.x + b.mRect.w) >= p.mRect.x && (b.mRect.y + b.mRect.h - COLLISION_ERROR) >= p.mRect.y && b.mRect.y <= (p.mRect.y + p.mRect.h - COLLISION_ERROR))
