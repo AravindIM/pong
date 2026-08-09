@@ -8,8 +8,8 @@ enum Direction {
 	DOWN = 1
 };
 enum CollisionEdge {
-	COLLIDE_LEFT,
-	COLLIDE_RIGHT
+	COLLIDE_LEFT_EDGE,
+	COLLIDE_RIGHT_EDGE,
 };
 
 struct Player {
@@ -36,8 +36,6 @@ struct Ball {
 	float mVy;
 	Ball();
 	void Move(double deltaTime);
-	void PaddleBounce();
-	void WallBounce();
 };
 
 Ball::Ball()
@@ -46,27 +44,8 @@ Ball::Ball()
 	, mVy(BALL_START_VY) {}
 
 void Ball::Move(double deltaTime) {
-	float dx, dy;
-	if (mRect.y <= BALL_MIN_Y) {
-		mRect.y = BALL_MIN_Y;
-		WallBounce();
-	}
-	if (mRect.y >= BALL_MAX_Y) {
-		mRect.y = BALL_MAX_Y;
-		WallBounce();
-	}
-	dx = (float)(mVx * deltaTime);
-	dy = (float)(mVy * deltaTime);
-	mRect.x = SDL_clamp(mRect.x + dx, BALL_MIN_X, BALL_MAX_X);
-	mRect.y = SDL_clamp(mRect.y + dy, BALL_MIN_Y, BALL_MAX_Y);
-}
-
-void Ball::PaddleBounce() {
-	mVx *= -1;
-}
-
-void Ball::WallBounce() {
-	mVy *= -1;
+	mRect.x = SDL_clamp(mRect.x + (float)(mVx * deltaTime), BALL_MIN_X, BALL_MAX_X);
+	mRect.y = SDL_clamp(mRect.y + (float)(mVy * deltaTime), BALL_MIN_Y, BALL_MAX_Y);
 }
 
 class Clock {
@@ -155,7 +134,7 @@ class Pong {
 	void Update();
 	void Render();
 	void Cleanup();
-	bool DetectCollision(const Player& p, const Ball& b);
+	void handleCollision();
 	void AddPad(SDL_JoystickID id);
 	void RemovePad(SDL_JoystickID id);
 	void ToggleJoin(SDL_JoystickID id);
@@ -224,12 +203,10 @@ void Pong::Update() {
 				if (yAxis < 0) p.Move(UP, deltaTime);
 				if (yAxis > 0) p.Move(DOWN, deltaTime);
 			}
-			if (DetectCollision(p, mBall)) {
-				mBall.PaddleBounce();
-			}
 		}
 	}
 	mBall.Move(deltaTime);
+	handleCollision();
 }
 
 void Pong::AddPad(SDL_JoystickID id) {
@@ -267,20 +244,35 @@ void Pong::ToggleJoin(SDL_JoystickID id) {
 	}
 }
 
-bool Pong::DetectCollision(const Player& p, const Ball& b) {
-	switch (p.mEdge) {
-	case COLLIDE_LEFT:
-		if ((b.mRect.x + b.mRect.w) >= p.mRect.x && (b.mRect.y + b.mRect.h - COLLISION_ERROR) >= p.mRect.y && b.mRect.y <= (p.mRect.y + p.mRect.h - COLLISION_ERROR))
-			return true;
-		break;
-	case COLLIDE_RIGHT:
-		if (b.mRect.x <= (p.mRect.x + p.mRect.w) && (b.mRect.y + b.mRect.h - COLLISION_ERROR) >= p.mRect.y && b.mRect.y <= (p.mRect.y + p.mRect.h - COLLISION_ERROR))
-			return true;
-		break;
-	default:
-		break;
+void Pong::handleCollision() {
+	if (mBall.mRect.y <= BALL_MIN_Y) {
+		mBall.mRect.y = BALL_MIN_Y;
+		mBall.mVy *= -1;
+	} else if (mBall.mRect.y >= BALL_MAX_Y) {
+		mBall.mRect.y = BALL_MAX_Y;
+		mBall.mVy *= -1;
 	}
-	return false;
+	if (mBall.mRect.x <= BALL_MIN_X) {
+		mBall.mRect.x = BALL_MIN_X;
+		mBall.mVx = 0;
+		mBall.mVy = 0;
+	}
+	else if (mBall.mRect.x >= BALL_MAX_X) {
+		mBall.mRect.x = BALL_MAX_X;
+		mBall.mVx = 0;
+		mBall.mVy = 0;
+	}
+	for (const Player& p : mPlayers) {
+		if (!SDL_HasRectIntersectionFloat(&p.mRect, &mBall.mRect)) continue;
+		if (p.mEdge == COLLIDE_LEFT_EDGE && mBall.mVx > 0) {
+			mBall.mRect.x = p.mRect.x - mBall.mRect.w;
+			mBall.mVx *= -1;
+		} else if (p.mEdge == COLLIDE_RIGHT_EDGE && mBall.mVx < 0) {
+			mBall.mRect.x = p.mRect.x + p.mRect.w;
+			mBall.mVx *= -1;
+		}
+
+	}
 }
 
 void Pong::Render() {
@@ -355,8 +347,8 @@ Pong::Pong()
 	, mWindow(nullptr)
 	, mRenderer(nullptr)
 	, mPlayers{
-		Player(PLAYER1_PADDLE_START_X, PLAYER_PADDLE_START_Y, COLLIDE_RIGHT),
-		Player(PLAYER2_PADDLE_START_X, PLAYER_PADDLE_START_Y, COLLIDE_LEFT)
+		Player(PLAYER1_PADDLE_START_X, PLAYER_PADDLE_START_Y, COLLIDE_RIGHT_EDGE),
+		Player(PLAYER2_PADDLE_START_X, PLAYER_PADDLE_START_Y, COLLIDE_LEFT_EDGE)
 	}
 	, mBall()
 {}
