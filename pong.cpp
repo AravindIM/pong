@@ -7,23 +7,38 @@ enum Direction {
 	UP = -1,
 	DOWN = 1
 };
-enum CollisionEdge {
-	COLLIDE_LEFT_EDGE,
-	COLLIDE_RIGHT_EDGE,
+enum PlayerVariant {
+	LEFT,
+	RIGHT,
 };
 
 struct Player {
 	SDL_FRect mRect;
-	CollisionEdge mEdge;
+	PlayerVariant mVariant;
 	SDL_Gamepad* mPad;
-	Player(float x, float y, CollisionEdge collisionEdge);
+	Player(PlayerVariant variant);
+	void Reset();
 	void Move(Direction dir, double deltaTime);
 };
 
-Player::Player(float x, float y, CollisionEdge collisionEdge)
-	: mRect(x, y, PLAYER_PADDLE_WIDTH, PLAYER_PADDLE_HEIGHT)
-	, mEdge(collisionEdge)
-	, mPad(nullptr){}
+Player::Player(PlayerVariant variant)
+	: mVariant(variant)
+	, mPad(nullptr){
+	Reset();
+}
+
+void Player::Reset() {
+	float x;
+	switch (mVariant) {
+	case LEFT:
+		x = PLAYER1_PADDLE_START_X;
+		break;
+	case RIGHT:
+		x = PLAYER2_PADDLE_START_X;
+		break;
+	}
+	mRect = SDL_FRect(x, PLAYER_PADDLE_START_Y, PLAYER_PADDLE_WIDTH, PLAYER_PADDLE_HEIGHT);
+}
 
 void Player::Move(Direction dir, double deltaTime) {
 	float dy = (float)(PLAYER_PADDLE_SPEED * deltaTime);
@@ -35,13 +50,19 @@ struct Ball {
 	float mVx;
 	float mVy;
 	Ball();
+	void Reset();
 	void Move(double deltaTime);
 };
 
-Ball::Ball()
-	: mRect(BALL_START_X, BALL_START_Y,BALL_SIZE, BALL_SIZE)
-	, mVx(BALL_START_VX)
-	, mVy(BALL_START_VY) {}
+Ball::Ball(){
+	Reset();
+}
+
+void Ball::Reset() {
+	mRect = SDL_FRect(BALL_START_X, BALL_START_Y, BALL_SIZE, BALL_SIZE);
+	mVx = BALL_START_VX;
+	mVy = BALL_START_VY;
+}
 
 void Ball::Move(double deltaTime) {
 	mRect.x = SDL_clamp(mRect.x + (float)(mVx * deltaTime), BALL_MIN_X, BALL_MAX_X);
@@ -122,6 +143,8 @@ Uint64 FPSCalculator::GetDT() {
 
 class Pong {
 	bool mExitGame;
+	bool mLobby;
+	bool mPlaying;
 	SDL_Window* mWindow;
 	SDL_Renderer* mRenderer;
 	Player mPlayers[MAX_PLAYERS];
@@ -131,13 +154,15 @@ class Pong {
 	void MainLoop();
 	void Tick();
 	void EventLoop();
+	void ToggleGameState();
+	void StopGame();
 	void Update();
 	void Render();
 	void Cleanup();
 	void HandleCollision();
 	void AddPad(SDL_JoystickID id);
 	void RemovePad(SDL_JoystickID id);
-	void ToggleJoin(SDL_JoystickID id);
+	void HandleStartButton(SDL_JoystickID id);
 
 public:
 	Pong();
@@ -184,7 +209,7 @@ void Pong::EventLoop() {
 			break;
 		case SDL_EVENT_GAMEPAD_BUTTON_DOWN:
 			if (event.gbutton.button == SDL_GAMEPAD_BUTTON_START) {
-				ToggleJoin(event.gdevice.which);
+				HandleStartButton(event.gdevice.which);
 			}
 			break;
 		default:
@@ -193,20 +218,41 @@ void Pong::EventLoop() {
 	}
 }
 
+void Pong::ToggleGameState() {
+	if (mLobby) {
+		mLobby = false;
+		mPlaying = true;
+	}
+	else if (!mPlaying) {
+		mLobby = true;
+		mBall.Reset();
+		for (Player& p : mPlayers) {
+			p.Reset();
+		}
+		mLobby = true;
+	}
+}
+
+void Pong::StopGame() {
+	mPlaying = false;
+}
+
 void Pong::Update() {
 	double deltaTime = mClock.GetDTSec();
 	mClock.Reset();
-	for (Player& p : mPlayers) {
-		if (p.mPad) {
-			Sint16 yAxis = SDL_GetGamepadAxis(p.mPad, SDL_GAMEPAD_AXIS_LEFTY);
-			if (SDL_abs(yAxis) >= JOYSTICK_DEADZONE) {
-				if (yAxis < 0) p.Move(UP, deltaTime);
-				if (yAxis > 0) p.Move(DOWN, deltaTime);
+	if (mPlaying) {
+		for (Player& p : mPlayers) {
+			if (p.mPad) {
+				Sint16 yAxis = SDL_GetGamepadAxis(p.mPad, SDL_GAMEPAD_AXIS_LEFTY);
+				if (SDL_abs(yAxis) >= JOYSTICK_DEADZONE) {
+					if (yAxis < 0) p.Move(UP, deltaTime);
+					if (yAxis > 0) p.Move(DOWN, deltaTime);
+				}
 			}
 		}
+		mBall.Move(deltaTime);
+		HandleCollision();
 	}
-	mBall.Move(deltaTime);
-	HandleCollision();
 }
 
 void Pong::AddPad(SDL_JoystickID id) {
@@ -225,18 +271,15 @@ void Pong::RemovePad(SDL_JoystickID id) {
 	}
 }
 
-void Pong::ToggleJoin(SDL_JoystickID id) {
+void Pong::HandleStartButton(SDL_JoystickID id) {
 	SDL_Gamepad* pad = SDL_GetGamepadFromID(id);
 	if (!pad) return;
 
 	for (Player& p : mPlayers) {
 		if (p.mPad == pad) {
-			p.mPad = nullptr;
+			ToggleGameState();
 			return;
 		}
-	}
-
-	for (Player& p : mPlayers) {
 		if (!p.mPad) {
 			p.mPad = pad;
 			return;
@@ -254,20 +297,18 @@ void Pong::HandleCollision() {
 	}
 	if (mBall.mRect.x <= BALL_MIN_X) {
 		mBall.mRect.x = BALL_MIN_X;
-		mBall.mVx = 0;
-		mBall.mVy = 0;
+		StopGame();
 	}
 	else if (mBall.mRect.x >= BALL_MAX_X) {
 		mBall.mRect.x = BALL_MAX_X;
-		mBall.mVx = 0;
-		mBall.mVy = 0;
+		StopGame();
 	}
 	for (const Player& p : mPlayers) {
 		if (!SDL_HasRectIntersectionFloat(&p.mRect, &mBall.mRect)) continue;
-		if (p.mEdge == COLLIDE_LEFT_EDGE && mBall.mVx > 0) {
+		if (p.mVariant == RIGHT && mBall.mVx > 0) {
 			mBall.mRect.x = p.mRect.x - mBall.mRect.w;
 			mBall.mVx *= -1;
-		} else if (p.mEdge == COLLIDE_RIGHT_EDGE && mBall.mVx < 0) {
+		} else if (p.mVariant == LEFT && mBall.mVx < 0) {
 			mBall.mRect.x = p.mRect.x + p.mRect.w;
 			mBall.mVx *= -1;
 		}
@@ -344,11 +385,13 @@ bool Pong::Init() {
 
 Pong::Pong()
 	: mExitGame(false)
+	, mLobby(true)
+	, mPlaying(false)
 	, mWindow(nullptr)
 	, mRenderer(nullptr)
 	, mPlayers{
-		Player(PLAYER1_PADDLE_START_X, PLAYER_PADDLE_START_Y, COLLIDE_RIGHT_EDGE),
-		Player(PLAYER2_PADDLE_START_X, PLAYER_PADDLE_START_Y, COLLIDE_LEFT_EDGE)
+		Player(LEFT),
+		Player(RIGHT)
 	}
 	, mBall()
 {}
