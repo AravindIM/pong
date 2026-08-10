@@ -121,7 +121,7 @@ Uint64 FPSCalculator::GetDT() {
 
 
 class Pong {
-	bool mRunning;
+	bool mExitGame;
 	SDL_Window* mWindow;
 	SDL_Renderer* mRenderer;
 	Player mPlayers[MAX_PLAYERS];
@@ -150,7 +150,7 @@ void Pong::MainLoop() {
 	FPSCalculator fpsCalc;
 	mClock.Reset();
 	fpsCalc.Reset();
-	while (mRunning) {
+	while (!mExitGame) {
 		fpsCalc.FrameStart();
 		Tick();
 		fpsCalc.FrameEnd();
@@ -174,7 +174,7 @@ void Pong::EventLoop() {
 	while (SDL_PollEvent(&event)) {
 		switch (event.type) {
 		case SDL_EVENT_QUIT:
-			mRunning = false;
+			mExitGame = true;
 			break;
 		case SDL_EVENT_GAMEPAD_ADDED:
 			AddPad(event.gdevice.which);
@@ -343,7 +343,7 @@ bool Pong::Init() {
 }
 
 Pong::Pong()
-	: mRunning(false)
+	: mExitGame(false)
 	, mWindow(nullptr)
 	, mRenderer(nullptr)
 	, mPlayers{
@@ -358,7 +358,6 @@ Pong::~Pong() {
 }
 
 void Pong::Run() {
-	mRunning = true;
 	MainLoop();
 }
 
