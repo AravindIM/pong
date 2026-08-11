@@ -143,6 +143,7 @@ Uint64 FPSCalculator::GetDT() {
 
 class Pong {
 	bool mExitGame;
+	bool mFullscreen;
 	bool mLobby;
 	bool mPlaying;
 	SDL_Window* mWindow;
@@ -154,6 +155,8 @@ class Pong {
 	void MainLoop();
 	void Tick();
 	void EventLoop();
+	void DisableFullscreen();
+	void ToggleFullscreen();
 	void ToggleGameState();
 	void StopGame();
 	void Update();
@@ -162,6 +165,7 @@ class Pong {
 	void HandleCollision();
 	void AddPad(SDL_JoystickID id);
 	void RemovePad(SDL_JoystickID id);
+	void HandleBackButton(SDL_JoystickID id);
 	void HandleStartButton(SDL_JoystickID id);
 
 public:
@@ -208,14 +212,43 @@ void Pong::EventLoop() {
 			RemovePad(event.gdevice.which);
 			break;
 		case SDL_EVENT_GAMEPAD_BUTTON_DOWN:
-			if (event.gbutton.button == SDL_GAMEPAD_BUTTON_START) {
+			switch (event.gbutton.button) {
+			case SDL_GAMEPAD_BUTTON_START:
 				HandleStartButton(event.gdevice.which);
+				break;
+			case SDL_GAMEPAD_BUTTON_BACK:
+				HandleBackButton(event.gdevice.which);
+				break;
+			default:
+				break;
+			}
+			break;
+		case SDL_EVENT_KEY_DOWN:
+			switch (event.key.key) {
+			case SDLK_ESCAPE:
+				DisableFullscreen();
+				break;
+			case SDLK_F11:
+				ToggleFullscreen();
+				break;
+			default:
+				break;
 			}
 			break;
 		default:
 			break;
 		}
 	}
+}
+
+void Pong::DisableFullscreen() {
+	mFullscreen = false;
+	SDL_SetWindowFullscreen(mWindow, mFullscreen);
+}
+
+void Pong::ToggleFullscreen() {
+	mFullscreen = !mFullscreen;
+	SDL_SetWindowFullscreen(mWindow, mFullscreen);
 }
 
 void Pong::ToggleGameState() {
@@ -268,6 +301,18 @@ void Pong::RemovePad(SDL_JoystickID id) {
 	SDL_Gamepad* pad = SDL_GetGamepadFromID(id);
 	if (pad) {
 		SDL_CloseGamepad(pad);
+	}
+}
+
+void Pong::HandleBackButton(SDL_JoystickID id) {
+	SDL_Gamepad* pad = SDL_GetGamepadFromID(id);
+	if (!pad) return;
+
+	for (Player& p : mPlayers) {
+		if (p.mPad == pad) {
+			ToggleFullscreen();
+			return;
+		}
 	}
 }
 
@@ -359,13 +404,14 @@ bool Pong::Init() {
 		Cleanup();
 		return false;
 	}
-	mWindow = SDL_CreateWindow("Pong", WINDOW_WIDTH, WINDOW_HEIGHT, SDL_WINDOW_RESIZABLE);
+	mWindow = SDL_CreateWindow("Pong", WINDOW_WIDTH, WINDOW_HEIGHT, SDL_WINDOW_RESIZABLE | SDL_WINDOW_MAXIMIZED);
 	if (!mWindow)
 	{
 		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Error", "SDL Could not create the window!", nullptr);
 		Cleanup();
 		return false;
 	}
+	SDL_SetWindowFullscreen(mWindow, mFullscreen);
 	mRenderer = SDL_CreateRenderer(mWindow, nullptr);
 	if (!mRenderer) {
 		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Error", "SDL Could not create renderer!", nullptr);
@@ -385,6 +431,7 @@ bool Pong::Init() {
 
 Pong::Pong()
 	: mExitGame(false)
+	, mFullscreen(true)
 	, mLobby(true)
 	, mPlaying(false)
 	, mWindow(nullptr)
