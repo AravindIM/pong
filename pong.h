@@ -25,7 +25,7 @@
 // Ball
 
 // Dimensions
-#define BALL_SIZE 20
+#define BALL_SIZE 10
 
 // Coordinates
 #define BALL_START_X ((WINDOW_WIDTH - BALL_SIZE) / 2)
@@ -38,8 +38,8 @@
 #define BALL_MAX_Y (WINDOW_HEIGHT - BALL_SIZE)
 
 // Physics
-#define BALL_START_VX -150
-#define BALL_START_VY -30
+#define BALL_START_VX -400
+#define BALL_START_VY -200
 
 
 // Players
@@ -49,7 +49,7 @@
 
 // Dimensions
 #define PLAYER_PADDLE_WIDTH BALL_SIZE
-#define PLAYER_PADDLE_HEIGHT 100
+#define PLAYER_PADDLE_HEIGHT 80
 
 // Coordinates
 #define PLAYER_PADDLE_GAP BALL_SIZE
