@@ -165,8 +165,8 @@ class Pong {
 	void HandleCollision();
 	void AddPad(SDL_JoystickID id);
 	void RemovePad(SDL_JoystickID id);
-	void HandleBackButton(SDL_JoystickID id);
-	void HandleStartButton(SDL_JoystickID id);
+	void HandleGamepadBackButton(SDL_JoystickID id);
+	void HandleGamepadStartButton(SDL_JoystickID id);
 
 public:
 	Pong();
@@ -214,10 +214,10 @@ void Pong::EventLoop() {
 		case SDL_EVENT_GAMEPAD_BUTTON_DOWN:
 			switch (event.gbutton.button) {
 			case SDL_GAMEPAD_BUTTON_START:
-				HandleStartButton(event.gdevice.which);
+				HandleGamepadStartButton(event.gdevice.which);
 				break;
 			case SDL_GAMEPAD_BUTTON_BACK:
-				HandleBackButton(event.gdevice.which);
+				HandleGamepadBackButton(event.gdevice.which);
 				break;
 			default:
 				break;
@@ -304,7 +304,7 @@ void Pong::RemovePad(SDL_JoystickID id) {
 	}
 }
 
-void Pong::HandleBackButton(SDL_JoystickID id) {
+void Pong::HandleGamepadBackButton(SDL_JoystickID id) {
 	SDL_Gamepad* pad = SDL_GetGamepadFromID(id);
 	if (!pad) return;
 
@@ -316,7 +316,7 @@ void Pong::HandleBackButton(SDL_JoystickID id) {
 	}
 }
 
-void Pong::HandleStartButton(SDL_JoystickID id) {
+void Pong::HandleGamepadStartButton(SDL_JoystickID id) {
 	SDL_Gamepad* pad = SDL_GetGamepadFromID(id);
 	if (!pad) return;
 
