@@ -11,8 +11,15 @@ endif()
 
 project ("pong")
 
+file(GLOB SOURCES
+	src/*.cpp
+)
+
+
 # Add source to this project's executable.
-add_executable (pong "pong.cpp" "pong.h")
+add_executable (pong ${SOURCES})
+
+target_include_directories(pong PRIVATE include)
 
 if (CMAKE_VERSION VERSION_GREATER 3.12)
   set_property(TARGET pong PROPERTY CXX_STANDARD 20)
