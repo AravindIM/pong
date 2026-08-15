@@ -40,4 +40,5 @@ struct Player {
 	Player(PlayerVariant variant);
 	void Reset();
 	void Move(Direction dir, double deltaTime);
+	void Render(SDL_Renderer* renderer);
 };

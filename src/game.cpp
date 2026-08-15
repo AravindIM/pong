@@ -146,15 +146,8 @@ void Game::Render() {
 
 	RenderNet(mRenderer, WINDOW_WIDTH/2, WINDOW_HEIGHT);
 
-	for (const Player& p : mPlayers) {
-		if (p.mPad) {
-			color = JOINED_COLOR;
-		}
-		else {
-			color = LEFT_COLOR;
-		}
-		SDL_SetRenderDrawColor(mRenderer, color, color, color, 0xFF);
-		SDL_RenderFillRect(mRenderer, &p.mRect);
+	for (Player& p : mPlayers) {
+		p.Render(mRenderer);
 	}
 
 	color = FG_COLOR;;

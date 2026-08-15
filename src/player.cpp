@@ -23,3 +23,10 @@ void Player::Move(Direction dir, double deltaTime) {
 	float dy = (float)(PLAYER_PADDLE_SPEED * deltaTime);
 	mRect.y = SDL_clamp(mRect.y + (float)dir * dy, PLAYER_PADDLE_MIN_Y, PLAYER_PADDLE_MAX_Y);
 }
+
+void Player::Render(SDL_Renderer* renderer) {
+	Uint8 color = mPad? JOINED_COLOR : LEFT_COLOR;
+
+	SDL_SetRenderDrawColor(renderer, color, color, color, 0xFF);
+	SDL_RenderFillRect(renderer, &mRect);
+}
