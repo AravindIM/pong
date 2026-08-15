@@ -26,6 +26,7 @@ class Game {
 	void EventLoop();
 	void Update();
 	void Render();
+	void RenderClear();
 	void HandleCollision();
 	void AddPad(SDL_JoystickID id);
 	void RemovePad(SDL_JoystickID id);

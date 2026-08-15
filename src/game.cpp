@@ -141,11 +141,8 @@ void Game::Update() {
 
 void Game::Render() {
 	Uint8 color = BG_COLOR;
-	SDL_SetRenderDrawColor(mRenderer, color, color, color, 0xFF);
-	SDL_RenderClear(mRenderer);
-
+	RenderClear();
 	RenderNet(mRenderer, WINDOW_WIDTH/2, WINDOW_HEIGHT);
-
 	for (Player& p : mPlayers) {
 		p.Render(mRenderer);
 	}
@@ -155,6 +152,11 @@ void Game::Render() {
 	SDL_RenderFillRect(mRenderer, &mBall.mRect);
 
 	SDL_RenderPresent(mRenderer);
+}
+
+void Game::RenderClear() {
+	SDL_SetRenderDrawColor(mRenderer, BG_COLOR, BG_COLOR, BG_COLOR, 0xFF);
+	SDL_RenderClear(mRenderer);
 }
 
 void Game::HandleCollision() {
