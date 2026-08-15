@@ -11,8 +11,14 @@ endif()
 
 project ("pong")
 
-file(GLOB SOURCES
-	src/*.cpp
+set (SOURCES
+	"src/pong.cpp"
+	"src/game.cpp"
+	"src/player.cpp"
+	"src/ball.cpp"
+	"src/net.cpp"
+	"src/clock.cpp"
+	"src/fps_calculator.cpp"
 )
 
 
