@@ -1,4 +1,5 @@
 #include "game.h"
+#include "net.h"
 
 Game::Game()
 	: mExitGame(false)
@@ -142,6 +143,8 @@ void Game::Render() {
 	Uint8 color = BG_COLOR;
 	SDL_SetRenderDrawColor(mRenderer, color, color, color, 0xFF);
 	SDL_RenderClear(mRenderer);
+
+	RenderNet(mRenderer, WINDOW_WIDTH/2, WINDOW_HEIGHT);
 
 	for (const Player& p : mPlayers) {
 		if (p.mPad) {
