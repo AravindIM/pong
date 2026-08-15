@@ -27,4 +27,5 @@ struct Ball {
 	Ball();
 	void Reset();
 	void Move(double deltaTime);
+	void Render(SDL_Renderer* renderer);
 };

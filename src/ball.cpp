@@ -14,3 +14,8 @@ void Ball::Move(double deltaTime) {
 	mRect.x = SDL_clamp(mRect.x + (float)(mVx * deltaTime), BALL_MIN_X, BALL_MAX_X);
 	mRect.y = SDL_clamp(mRect.y + (float)(mVy * deltaTime), BALL_MIN_Y, BALL_MAX_Y);
 }
+
+void Ball::Render(SDL_Renderer* renderer) {
+	SDL_SetRenderDrawColor(renderer, FG_COLOR, FG_COLOR, FG_COLOR, 0xFF);
+	SDL_RenderFillRect(renderer, &mRect);
+}

@@ -140,17 +140,12 @@ void Game::Update() {
 }
 
 void Game::Render() {
-	Uint8 color = BG_COLOR;
 	RenderClear();
 	RenderNet(mRenderer, WINDOW_WIDTH/2, WINDOW_HEIGHT);
 	for (Player& p : mPlayers) {
 		p.Render(mRenderer);
 	}
-
-	color = FG_COLOR;;
-	SDL_SetRenderDrawColor(mRenderer, color, color, color, 0xFF);
-	SDL_RenderFillRect(mRenderer, &mBall.mRect);
-
+	mBall.Render(mRenderer);
 	SDL_RenderPresent(mRenderer);
 }
 
