@@ -1,15 +1,15 @@
 #pragma once
 
 // Window configuration
-#define WINDOW_WIDTH 1280
-#define WINDOW_HEIGHT 720
+constexpr int WINDOW_WIDTH = 1280;
+constexpr int WINDOW_HEIGHT = 720;
 
 // Graphics
-#define VSYNC_ENABLED 1
-#define BG_COLOR 0x00
-#define FG_COLOR 0xFF
-#define JOINED_COLOR 0xFF
-#define LEFT_COLOR 0x55
+constexpr int VSYNC_ENABLED = 1;
+constexpr Uint8 BG_COLOR = 0x00;
+constexpr Uint8 FG_COLOR = 0xFF;
+constexpr Uint8 JOINED_COLOR = 0xFF;
+constexpr Uint8 LEFT_COLOR = 0x55;
 
 // Input
-#define JOYSTICK_DEADZONE 1000
+constexpr Sint16 JOYSTICK_DEADZONE = 1000;

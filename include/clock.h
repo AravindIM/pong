@@ -6,5 +6,5 @@ class Clock {
 public:
 	Clock();
 	void Reset();
-	double GetDTSec();
+	float GetDTSec();
 };

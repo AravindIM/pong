@@ -7,10 +7,8 @@ Ball::Ball() :
 	std::random_device dev;
 	std::mt19937 rng(dev());
 	std::bernoulli_distribution dist(0.5);
-	mVx = static_cast<float>(BALL_START_VX);
-	mVy = static_cast<float>(BALL_START_VY);
-	mVx = dist(rng) ? mVx : -mVx;
-	mVy = dist(rng) ? mVy : -mVy;
+	mVx = dist(rng) ? BALL_START_VX : -BALL_START_VX;
+	mVy = dist(rng) ? BALL_START_VY : -BALL_START_VY;
 	Reset();
 }
 
@@ -22,10 +20,10 @@ void Ball::Reset() {
 	mRect = SDL_FRect(BALL_START_X, dist(rng), BALL_SIZE, BALL_SIZE);
 }
 
-void Ball::Move(double deltaTime) {
+void Ball::Move(float deltaTime) {
 	mShow = true;
-	mRect.x = SDL_clamp(mRect.x + (float)(mVx * deltaTime), BALL_MIN_X, BALL_MAX_X);
-	mRect.y = SDL_clamp(mRect.y + (float)(mVy * deltaTime), BALL_MIN_Y, BALL_MAX_Y);
+	mRect.x = SDL_clamp(mRect.x + mVx * deltaTime, BALL_MIN_X, BALL_MAX_X);
+	mRect.y = SDL_clamp(mRect.y + mVy * deltaTime, BALL_MIN_Y, BALL_MAX_Y);
 }
 
 void Ball::Render(SDL_Renderer* renderer) {

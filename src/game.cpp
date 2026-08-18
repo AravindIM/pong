@@ -122,7 +122,7 @@ void Game::EventLoop() {
 }
 
 void Game::Update() {
-	double deltaTime = mClock.GetDTSec();
+	float deltaTime = mClock.GetDTSec();
 	mClock.Reset();
 	if (mPlaying) {
 		for (Player& p : mPlayers) {

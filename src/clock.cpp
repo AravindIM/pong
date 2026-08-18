@@ -6,6 +6,6 @@ void Clock::Reset() {
 	mStartTime = SDL_GetTicksNS();
 }
 
-double Clock::GetDTSec() {
-	return (double)(SDL_GetTicksNS() - mStartTime) / SDL_NS_PER_SECOND;
+float Clock::GetDTSec() {
+	return (float)(SDL_GetTicksNS() - mStartTime) / SDL_NS_PER_SECOND;
 }
