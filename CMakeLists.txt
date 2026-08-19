@@ -19,6 +19,7 @@ set (SOURCES
 	"src/net.cpp"
 	"src/clock.cpp"
 	"src/fps_calculator.cpp"
+	"src/sound.cpp"
 )
 
 

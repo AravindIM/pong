@@ -6,7 +6,7 @@ Game::~Game() {
 }
 
 bool Game::Init() {
-	if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_GAMEPAD))
+	if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_GAMEPAD))
 	{
 		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Error", "SDL Could not initialise the video!", nullptr);
 		Cleanup();
@@ -33,6 +33,9 @@ bool Game::Init() {
 		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Error", "SDL Could not scale to the display!", nullptr);
 		Cleanup();
 		return false;
+	}
+	if (!mSound.Init()) {
+		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Error", "SDL could not initialize the audio stream!", nullptr);
 	}
 	return true;
 }
@@ -144,10 +147,12 @@ void Game::HandleCollision() {
 	if (mBall.mRect.y <= BALL_MIN_Y) {
 		mBall.mRect.y = BALL_MIN_Y;
 		mBall.mVy *= -1;
+		mSound.Play(SOUND_BOUNCE);
 	}
 	else if (mBall.mRect.y >= BALL_MAX_Y) {
 		mBall.mRect.y = BALL_MAX_Y;
 		mBall.mVy *= -1;
+		mSound.Play(SOUND_BOUNCE);
 	}
 	if (mBall.mRect.x <= BALL_MIN_X) {
 		mBall.mRect.x = BALL_MIN_X;
@@ -162,10 +167,12 @@ void Game::HandleCollision() {
 		if (p.mVariant == RIGHT && mBall.mVx > 0) {
 			mBall.mRect.x = p.mRect.x - mBall.mRect.w;
 			mBall.mVx *= -1;
+			mSound.Play(SOUND_HIT);
 		}
 		else if (p.mVariant == LEFT && mBall.mVx < 0) {
 			mBall.mRect.x = p.mRect.x + p.mRect.w;
 			mBall.mVx *= -1;
+			mSound.Play(SOUND_HIT);
 		}
 
 	}
@@ -217,12 +224,14 @@ void Game::HandleGamepadStartButton(SDL_JoystickID id) {
 
 void Game::StopGame() {
 	mPlaying = false;
+	mSound.Play(SOUND_SCORE);
 }
 
 void Game::ToggleGameState() {
 	if (mLobby) {
 		mLobby = false;
 		mPlaying = true;
+		mSound.Play(SOUND_START);
 	}
 	else if (!mPlaying) {
 		mLobby = true;

@@ -9,6 +9,7 @@
 #include "ball.h"
 #include "clock.h"
 #include "fps_calculator.h"
+#include "sound.h"
 
 class Game {
 	bool mExitGame{ false };
@@ -20,6 +21,7 @@ class Game {
 	Player mPlayers[MAX_PLAYERS]{ Player(LEFT), Player(RIGHT) };
 	Ball mBall{};
 	Clock mClock{};
+	Sound mSound{};
 
 	void MainLoop();
 	void Tick();
