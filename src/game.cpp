@@ -1,20 +1,6 @@
 #include "game.h"
 #include "net.h"
 
-Game::Game()
-	: mExitGame(false)
-	, mFullscreen(true)
-	, mLobby(true)
-	, mPlaying(false)
-	, mWindow(nullptr)
-	, mRenderer(nullptr)
-	, mPlayers{
-		Player(LEFT),
-		Player(RIGHT)
-	}
-	, mBall()
-{}
-
 Game::~Game() {
 	Cleanup();
 }

@@ -11,15 +11,15 @@
 #include "fps_calculator.h"
 
 class Game {
-	bool mExitGame;
-	bool mFullscreen;
-	bool mLobby;
-	bool mPlaying;
-	SDL_Window* mWindow;
-	SDL_Renderer* mRenderer;
-	Player mPlayers[MAX_PLAYERS];
-	Ball mBall;
-	Clock mClock;
+	bool mExitGame{ false };
+	bool mFullscreen{ true };
+	bool mLobby{ true };
+	bool mPlaying{ false };
+	SDL_Window* mWindow{};
+	SDL_Renderer* mRenderer{};
+	Player mPlayers[MAX_PLAYERS]{ Player(LEFT), Player(RIGHT) };
+	Ball mBall{};
+	Clock mClock{};
 
 	void MainLoop();
 	void Tick();
@@ -39,7 +39,7 @@ class Game {
 	void Cleanup();
 
 public:
-	Game();
+	Game() = default;
 	~Game();
 	bool Init();
 	void Run();

@@ -34,9 +34,9 @@ enum PlayerVariant {
 };
 
 struct Player {
-	SDL_FRect mRect;
-	PlayerVariant mVariant;
-	SDL_Gamepad* mPad;
+	SDL_FRect mRect{};
+	PlayerVariant mVariant{};
+	SDL_Gamepad* mPad{};
 	Player(PlayerVariant variant);
 	void Reset();
 	void Move(Direction dir, float deltaTime);

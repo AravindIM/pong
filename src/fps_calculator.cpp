@@ -1,14 +1,5 @@
 #include "fps_calculator.h"
 
-FPSCalculator::FPSCalculator()
-	: mFrames(0)
-	, mStartTime(0)
-	, mFrameStartTime(0)
-	, mElapsed(0)
-	, mFPS(0)
-{
-}
-
 void FPSCalculator::Reset() {
 	mStartTime = SDL_GetTicksNS();
 }

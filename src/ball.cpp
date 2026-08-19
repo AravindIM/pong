@@ -1,23 +1,19 @@
 #include "ball.h"
-#include <random>
+#include "random.h"
 
 Ball::Ball() :
 	mShow(false)
 {
-	std::random_device dev;
-	std::mt19937 rng(dev());
-	std::bernoulli_distribution dist(0.5);
-	mVx = dist(rng) ? BALL_START_VX : -BALL_START_VX;
-	mVy = dist(rng) ? BALL_START_VY : -BALL_START_VY;
+	mVx = getRandomSign() * BALL_START_VX;
+	mVy = getRandomSign() * BALL_START_VY;
 	Reset();
 }
 
 void Ball::Reset() {
 	mShow = false;
-	std::random_device dev;
-	std::mt19937 rng(dev());
-	std::uniform_real_distribution<float> dist(BALL_MIN_Y + (BALL_MAX_Y - BALL_MIN_Y) * BALL_START_Y_MIN_PERCENT, BALL_MIN_Y + (BALL_MAX_Y - BALL_MIN_Y) * BALL_START_Y_MAX_PERCENT);
-	mRect = SDL_FRect(BALL_START_X, dist(rng), BALL_SIZE, BALL_SIZE);
+	constexpr float minRandomY = BALL_MIN_Y + (BALL_MAX_Y - BALL_MIN_Y) * BALL_START_Y_MIN_PERCENT;
+	constexpr float maxRandomY = BALL_MIN_Y + (BALL_MAX_Y - BALL_MIN_Y) * BALL_START_Y_MAX_PERCENT;
+	mRect = SDL_FRect(BALL_START_X, random<std::uniform_real_distribution<float>>(minRandomY, maxRandomY), BALL_SIZE, BALL_SIZE);
 }
 
 void Ball::Move(float deltaTime) {

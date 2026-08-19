@@ -1,7 +1,5 @@
 #include "clock.h"
 
-Clock::Clock() : mStartTime(0) {}
-
 void Clock::Reset() {
 	mStartTime = SDL_GetTicksNS();
 }

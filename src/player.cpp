@@ -1,8 +1,8 @@
 #include "player.h"
 
 Player::Player(PlayerVariant variant)
-	: mVariant(variant)
-	, mPad(nullptr) {
+	: mVariant(variant) 
+{
 	Reset();
 }
 
