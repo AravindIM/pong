@@ -215,6 +215,8 @@ void Game::HandleGamepadStartButton(SDL_JoystickID id) {
 			ToggleGameState();
 			return;
 		}
+	}
+	for (Player& p : mPlayers) {
 		if (!p.mPad) {
 			p.mPad = pad;
 			return;
