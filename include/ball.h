@@ -22,6 +22,8 @@ constexpr float BALL_MAX_Y = (WINDOW_HEIGHT - BALL_SIZE);
 // Physics
 constexpr float BALL_START_VX = 250;
 constexpr float BALL_START_VY = 250;
+constexpr float BALL_MIN_RANDOM_Y = BALL_MIN_Y + (BALL_MAX_Y - BALL_MIN_Y) * BALL_START_Y_MIN_PERCENT;
+constexpr float BALL_MAX_RANDOM_Y = BALL_MIN_Y + (BALL_MAX_Y - BALL_MIN_Y) * BALL_START_Y_MAX_PERCENT;
 
 struct Ball {
 	SDL_FRect mRect;

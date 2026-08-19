@@ -11,9 +11,7 @@ Ball::Ball() :
 
 void Ball::Reset() {
 	mShow = false;
-	constexpr float minRandomY = BALL_MIN_Y + (BALL_MAX_Y - BALL_MIN_Y) * BALL_START_Y_MIN_PERCENT;
-	constexpr float maxRandomY = BALL_MIN_Y + (BALL_MAX_Y - BALL_MIN_Y) * BALL_START_Y_MAX_PERCENT;
-	float randomY = random<std::uniform_real_distribution<float>>(minRandomY, maxRandomY);
+	float randomY = random<std::uniform_real_distribution<float>>(BALL_MIN_RANDOM_Y, BALL_MAX_RANDOM_Y);
 	mRect = SDL_FRect(BALL_START_X, randomY, BALL_SIZE, BALL_SIZE);
 }
 
