@@ -23,7 +23,7 @@ set (SOURCES
 
 
 # Add source to this project's executable.
-add_executable (pong ${SOURCES} "include/random.h")
+add_executable (pong ${SOURCES})
 
 target_include_directories(pong PRIVATE include)
 
