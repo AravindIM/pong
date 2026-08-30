@@ -33,19 +33,20 @@ constexpr std::array<Uint8, 10> SCORE_DIGIT_MAP = {
 	0b01101111,
 };
 
-constexpr SDL_FRect SCORE_PLAYER1 = {
-	.x = (WINDOW_WIDTH - SCORE_WIDTH * 2) / 4,
-	.y = SCORE_TOP_GAP,
-	.w = SCORE_WIDTH,
-	.h = SCORE_HEIGHT,
-};
-
-constexpr SDL_FRect SCORE_PLAYER2 = {
-	.x = (WINDOW_WIDTH * 3 - SCORE_WIDTH * 2) / 4,
-	.y = SCORE_TOP_GAP,
-	.w = SCORE_WIDTH,
-	.h = SCORE_HEIGHT,
-};
+constexpr std::array<SDL_FRect, 2> SCORE_BOARD_PLAYERS = { {
+	{
+		.x = (WINDOW_WIDTH - SCORE_WIDTH * 2) / 4,
+		.y = SCORE_TOP_GAP,
+		.w = SCORE_WIDTH,
+		.h = SCORE_HEIGHT,
+	},
+	{
+		.x = (WINDOW_WIDTH * 3 - SCORE_WIDTH * 2) / 4,
+		.y = SCORE_TOP_GAP,
+		.w = SCORE_WIDTH,
+		.h = SCORE_HEIGHT,
+	}
+} };
 
 void RenderScoreSegmentType(SDL_Renderer* renderer, ScoreSegmentType st, SDL_FRect rect);
 void RenderScoreSegment(SDL_Renderer* renderer, Uint8 segment, SDL_FRect rect);
