@@ -51,7 +51,7 @@ void RenderScoreSegment(SDL_Renderer* renderer, Uint8 segment, SDL_FRect rect) {
 
 void RenderScoreDigit(SDL_Renderer* renderer, Uint8 digit, SDL_FRect rect) {
 	if (digit > SCORE_DIGIT_MAP.size()) {
-		exit(-1);
+		return;
 	}
 
 	Uint8 repr = SCORE_DIGIT_MAP[(size_t)digit];
