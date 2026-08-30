@@ -44,7 +44,7 @@ void RenderScoreSegment(SDL_Renderer* renderer, Uint8 segment, SDL_FRect rect) {
 		st = SCORE_SEGMENT_HORIZONTAL;
 		break;
 	default:
-		break;
+		return;
 	}
 	RenderScoreSegmentType(renderer, st, rect);
 }
