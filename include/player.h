@@ -37,6 +37,8 @@ struct Player {
 	SDL_FRect mRect{};
 	PlayerVariant mVariant{};
 	SDL_Gamepad* mPad{};
+	Uint8 mScore{};
+
 	Player(PlayerVariant variant);
 	void Reset();
 	void Move(Direction dir, float deltaTime);
