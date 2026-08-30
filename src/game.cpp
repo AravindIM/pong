@@ -1,5 +1,6 @@
 #include "game.h"
 #include "net.h"
+#include "score.h"
 
 Game::~Game() {
 	Cleanup();
@@ -135,6 +136,8 @@ void Game::Render() {
 		p.Render(mRenderer);
 	}
 	mBall.Render(mRenderer);
+	RenderScore(mRenderer, 0, SCORE_PLAYER1);
+	RenderScore(mRenderer, 0, SCORE_PLAYER2);
 	SDL_RenderPresent(mRenderer);
 }
 
