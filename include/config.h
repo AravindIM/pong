@@ -1,4 +1,5 @@
 #pragma once
+#include <SDL3/SDL.h>
 
 // Window configuration
 constexpr int WINDOW_WIDTH = 1280;
