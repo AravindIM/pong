@@ -47,12 +47,6 @@ constexpr SDL_FRect SCORE_PLAYER2 = {
 	.h = SCORE_HEIGHT,
 };
 
-class Scoreboard {
-	SDL_FRect mRect{};
-	float mThickness{ SCORE_SEGMENT_THICKNESS };
-public:
-	Scoreboard(SDL_FRect rect);
-	void RenderSegmentType(SDL_Renderer* renderer, ScoreSegmentType st, SDL_FRect rect);
-	void RenderSegment(SDL_Renderer* renderer, Uint8 segment, SDL_FRect rect);
-	void RenderDigit(SDL_Renderer* renderer, Uint8 digit, SDL_FRect rect);
-};
+void RenderScoreSegmentType(SDL_Renderer* renderer, ScoreSegmentType st, SDL_FRect rect);
+void RenderScoreSegment(SDL_Renderer* renderer, Uint8 segment, SDL_FRect rect);
+void RenderScoreDigit(SDL_Renderer* renderer, Uint8 digit, SDL_FRect rect);

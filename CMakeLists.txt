@@ -16,7 +16,7 @@ set (SOURCES
 	"src/game.cpp"
 	"src/player.cpp"
 	"src/ball.cpp"
-	"src/scoreboard.cpp"
+	"src/score.cpp"
 	"src/net.cpp"
 	"src/clock.cpp"
 	"src/fps_calculator.cpp"
