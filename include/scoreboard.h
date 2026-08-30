@@ -6,4 +6,5 @@ struct Scoreboard {
 	SDL_FRect mRect{};
 	float mThickness{};
 	Scoreboard() = default;
+	void RenderSegment(SDL_Renderer* renderer, Uint8 segment);
 };
