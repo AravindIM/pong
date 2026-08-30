@@ -51,3 +51,4 @@ void RenderScoreSegmentType(SDL_Renderer* renderer, ScoreSegmentType st, SDL_FRe
 void RenderScoreSegment(SDL_Renderer* renderer, Uint8 segment, SDL_FRect rect);
 void RenderScoreDigit(SDL_Renderer* renderer, Uint8 digit, SDL_FRect rect);
 void RenderScoreDigitInPlace(SDL_Renderer* renderer, Uint8 digit, Uint8 place, SDL_FRect rect);
+void RenderScore(SDL_Renderer* renderer, Uint8 score, SDL_FRect rect);
