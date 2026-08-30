@@ -1,4 +1,4 @@
-#include "scoreboard.h"
+#include "score.h"
 #include <cassert>
 
 void RenderScoreSegmentType(SDL_Renderer* renderer, ScoreSegmentType st, SDL_FRect rect) {
