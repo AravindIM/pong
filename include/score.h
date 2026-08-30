@@ -50,3 +50,4 @@ constexpr SDL_FRect SCORE_PLAYER2 = {
 void RenderScoreSegmentType(SDL_Renderer* renderer, ScoreSegmentType st, SDL_FRect rect);
 void RenderScoreSegment(SDL_Renderer* renderer, Uint8 segment, SDL_FRect rect);
 void RenderScoreDigit(SDL_Renderer* renderer, Uint8 digit, SDL_FRect rect);
+void RenderScoreDigitInPlace(SDL_Renderer* renderer, Uint8 digit, Uint8 place, SDL_FRect rect);

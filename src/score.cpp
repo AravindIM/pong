@@ -63,3 +63,11 @@ void RenderScoreDigit(SDL_Renderer* renderer, Uint8 digit, SDL_FRect rect) {
 		repr /= 2;
 	}
 }
+
+void RenderScoreDigitInPlace(SDL_Renderer* renderer, Uint8 digit, Uint8 place, SDL_FRect rect) {
+	Uint8 index = SCORE_MAX_DIGITS - place - 1;
+	if (index > 0) {
+		rect.x += index * SCORE_DIGIT_WIDTH + (index - 1) * SCORE_DIGIT_SEPERATOR_GAP;
+	}
+	RenderScoreDigit(renderer, digit, rect);
+}
