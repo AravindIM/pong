@@ -132,12 +132,13 @@ void Game::Update() {
 void Game::Render() {
 	RenderClear();
 	RenderNet(mRenderer, WINDOW_WIDTH/2, WINDOW_HEIGHT);
+	int i = 0;
 	for (Player& p : mPlayers) {
 		p.Render(mRenderer);
+		RenderScore(mRenderer, p.mScore, SCORE_BOARD_PLAYERS[i]);
+		i++;
 	}
 	mBall.Render(mRenderer);
-	RenderScore(mRenderer, 0, SCORE_PLAYER1);
-	RenderScore(mRenderer, 0, SCORE_PLAYER2);
 	SDL_RenderPresent(mRenderer);
 }
 
@@ -159,10 +160,12 @@ void Game::HandleCollision() {
 	}
 	if (mBall.mRect.x <= BALL_MIN_X) {
 		mBall.mRect.x = BALL_MIN_X;
+		mPlayers[1].mScore++;
 		StopGame();
 	}
 	else if (mBall.mRect.x >= BALL_MAX_X) {
 		mBall.mRect.x = BALL_MAX_X;
+		mPlayers[0].mScore++;
 		StopGame();
 	}
 	for (const Player& p : mPlayers) {
