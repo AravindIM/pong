@@ -2,42 +2,50 @@
 
 Scoreboard::Scoreboard(SDL_FRect rect): mRect(rect) {}
 
+void Scoreboard::RenderSegmentType(SDL_Renderer* renderer, ScoreSegmentType st, SDL_FRect rect) {
+	switch (st) {
+	case SCORE_SEGMENT_HORIZONTAL:
+		rect.h = mThickness;
+	case SCORE_SEGMENT_VERTICAL:
+		rect.w = mThickness;
+		rect.h /= 2;
+	}
+	SDL_SetRenderDrawColor(renderer, FG_COLOR, FG_COLOR, FG_COLOR, 0xFF);
+	SDL_RenderFillRect(renderer, &rect);
+}
+
 void Scoreboard::RenderSegment(SDL_Renderer* renderer, Uint8 segment, SDL_FRect rect) {
+	ScoreSegmentType st;
 	switch (segment) {
 	case 0:
-		rect.h = mThickness;
+		st = SCORE_SEGMENT_HORIZONTAL;
 		break;
 	case 1:
 		rect.x += rect.w - mThickness;
-		rect.w = mThickness;
-		rect.h /= 2;
+		st = SCORE_SEGMENT_VERTICAL;
 		break;
 	case 2:
 		rect.x += rect.w - mThickness;
 		rect.y += rect.h / 2;
-		rect.w = mThickness;
-		rect.h /= 2;
+		st = SCORE_SEGMENT_VERTICAL;
 		break;
 	case 3:
 		rect.y += rect.h - mThickness,
-		rect.h = mThickness;
+		st = SCORE_SEGMENT_HORIZONTAL;
 		break;
 	case 4:
 		rect.y += rect.h / 2;
-		rect.w = mThickness;
-		rect.h /=  2;
+		st = SCORE_SEGMENT_VERTICAL;
 		break;
 	case 5:
-		rect.w = mThickness;
-		rect.h /= 2;
+		st = SCORE_SEGMENT_VERTICAL;
 		break;
 	case 6:
 		rect.y += (rect.h - mThickness) / 2;
-		rect.h = mThickness;
+		st = SCORE_SEGMENT_HORIZONTAL;
 		break;
 	default:
 		break;
 	}
-	SDL_SetRenderDrawColor(renderer, FG_COLOR, FG_COLOR, FG_COLOR, 0xFF);
-	SDL_RenderFillRect(renderer, &rect);
+	RenderSegmentType(renderer, st, rect);
 }

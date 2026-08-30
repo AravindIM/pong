@@ -2,6 +2,11 @@
 #include "config.h"
 #include<SDL3/SDL.h>
 
+enum ScoreSegmentType {
+	SCORE_SEGMENT_HORIZONTAL,
+	SCORE_SEGMENT_VERTICAL
+};
+
 constexpr float SCORE_SEGMENT_THICKNESS = 5.0;
 
 constexpr int SCORE_DIGIT_COUNT = 2;
@@ -33,5 +38,6 @@ class Scoreboard {
 	float mThickness{ SCORE_SEGMENT_THICKNESS };
 public:
 	Scoreboard(SDL_FRect rect);
+	void RenderSegmentType(SDL_Renderer* renderer, ScoreSegmentType st, SDL_FRect rect);
 	void RenderSegment(SDL_Renderer* renderer, Uint8 segment, SDL_FRect rect);
 };
