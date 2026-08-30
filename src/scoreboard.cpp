@@ -1,4 +1,5 @@
 #include "scoreboard.h"
+#include <cassert>
 
 Scoreboard::Scoreboard(SDL_FRect rect): mRect(rect) {}
 
@@ -48,4 +49,19 @@ void Scoreboard::RenderSegment(SDL_Renderer* renderer, Uint8 segment, SDL_FRect 
 		break;
 	}
 	RenderSegmentType(renderer, st, rect);
+}
+
+void Scoreboard::RenderDigit(SDL_Renderer* renderer, Uint8 digit, SDL_FRect rect) {
+	if (digit > SCORE_DIGIT_MAP.size()) {
+		exit(-1);
+	}
+
+	Uint8 repr = SCORE_DIGIT_MAP[(size_t)digit];
+
+	for (Uint8 segment = 0; repr != 0; ++segment) {
+		if (repr % 2) {
+			RenderSegment(renderer, segment, rect);
+		}
+		repr /= 2;
+	}
 }

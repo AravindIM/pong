@@ -1,6 +1,7 @@
 #pragma once
 #include "config.h"
 #include<SDL3/SDL.h>
+#include<array>
 
 enum ScoreSegmentType {
 	SCORE_SEGMENT_HORIZONTAL,
@@ -18,6 +19,19 @@ constexpr float SCORE_DIGIT_SEPERATOR_GAP = SCORE_SEGMENT_THICKNESS;
 constexpr float SCORE_WIDTH = SCORE_DIGIT_WIDTH * SCORE_DIGIT_COUNT + SCORE_DIGIT_SEPERATOR_GAP * (SCORE_DIGIT_COUNT - 1);
 constexpr float SCORE_HEIGHT = SCORE_DIGIT_HEIGHT;
 constexpr float SCORE_TOP_GAP = SCORE_SEGMENT_THICKNESS * 2;
+
+constexpr std::array<Uint8, 10> SCORE_DIGIT_MAP = {
+	0b00111111,
+	0b00000110,
+	0b01011011,
+	0b01001111,
+	0b01100110,
+	0b01101101,
+	0b01111101,
+	0b00000111,
+	0b01111111,
+	0b01101111,
+};
 
 constexpr SDL_FRect SCORE_PLAYER1 = {
 	.x = (WINDOW_WIDTH - SCORE_WIDTH) / 2,
@@ -40,4 +54,5 @@ public:
 	Scoreboard(SDL_FRect rect);
 	void RenderSegmentType(SDL_Renderer* renderer, ScoreSegmentType st, SDL_FRect rect);
 	void RenderSegment(SDL_Renderer* renderer, Uint8 segment, SDL_FRect rect);
+	void RenderDigit(SDL_Renderer* renderer, Uint8 digit, SDL_FRect rect);
 };
