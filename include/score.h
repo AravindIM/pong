@@ -8,7 +8,7 @@ enum ScoreSegmentType {
 	SCORE_SEGMENT_VERTICAL
 };
 
-constexpr float SCORE_SEGMENT_THICKNESS = 5.0;
+constexpr float SCORE_SEGMENT_THICKNESS = 10.0f;
 
 constexpr int SCORE_MAX_DIGITS = 2;
 
@@ -18,7 +18,7 @@ constexpr float SCORE_DIGIT_SEPERATOR_GAP = SCORE_SEGMENT_THICKNESS;
 
 constexpr float SCORE_WIDTH = SCORE_DIGIT_WIDTH * SCORE_MAX_DIGITS + SCORE_DIGIT_SEPERATOR_GAP * (SCORE_MAX_DIGITS - 1);
 constexpr float SCORE_HEIGHT = SCORE_DIGIT_HEIGHT;
-constexpr float SCORE_TOP_GAP = SCORE_SEGMENT_THICKNESS * 2;
+constexpr float SCORE_TOP_GAP = SCORE_SEGMENT_THICKNESS * 1;
 
 constexpr std::array<Uint8, 10> SCORE_DIGIT_MAP = {
 	0b00111111,
@@ -34,7 +34,7 @@ constexpr std::array<Uint8, 10> SCORE_DIGIT_MAP = {
 };
 
 constexpr SDL_FRect SCORE_PLAYER1 = {
-	.x = (WINDOW_WIDTH - SCORE_WIDTH) / 2,
+	.x = (WINDOW_WIDTH - SCORE_WIDTH * 2) / 4,
 	.y = SCORE_TOP_GAP,
 	.w = SCORE_WIDTH,
 	.h = SCORE_HEIGHT,
