@@ -4,9 +4,10 @@
 
 constexpr float SCORE_THICKNESS = 5.0;
 
-struct Scoreboard {
+class Scoreboard {
 	SDL_FRect mRect{};
 	float mThickness{ SCORE_THICKNESS };
-	Scoreboard() = default;
+public:
+	Scoreboard(SDL_FRect rect);
 	void RenderSegment(SDL_Renderer* renderer, Uint8 segment, SDL_FRect rect);
 };

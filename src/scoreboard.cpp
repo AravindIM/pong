@@ -1,5 +1,7 @@
 #include "scoreboard.h"
 
+Scoreboard::Scoreboard(SDL_FRect rect): mRect(rect) {}
+
 void Scoreboard::RenderSegment(SDL_Renderer* renderer, Uint8 segment, SDL_FRect rect) {
 	switch (segment) {
 	case 0:
