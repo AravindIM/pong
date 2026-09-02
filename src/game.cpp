@@ -219,7 +219,7 @@ void Game::HandleGamepadStartButton(SDL_JoystickID id) {
 
 	for (Player& p : mPlayers) {
 		if (p.mPad == pad) {
-			ToggleGameState();
+			StartGame();
 			return;
 		}
 	}
@@ -236,23 +236,19 @@ void Game::StopGame() {
 	mSound.Play(SOUND_SCORE);
 }
 
-void Game::ToggleGameState() {
-	if (mPlayers[0].IsMaxScore() || mPlayers[1].IsMaxScore()) {
-		mPlayers[0].ResetScore();
-		mPlayers[1].ResetScore();
-	}
-	if (mLobby) {
-		mLobby = false;
+void Game::StartGame() {
+	if (!mPlaying) {
 		mPlaying = true;
-	}
-	else if (!mPlaying) {
-		mLobby = true;
+		if (mPlayers[0].IsMaxScore() || mPlayers[1].IsMaxScore()) {
+			mPlayers[0].ResetScore();
+			mPlayers[1].ResetScore();
+		}
 		mBall.Reset();
 		for (Player& p : mPlayers) {
 			p.Reset();
 		}
+		mSound.Play(SOUND_START);
 	}
-	mSound.Play(SOUND_START);
 }
 
 void Game::DisableFullscreen() {

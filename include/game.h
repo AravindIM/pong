@@ -14,7 +14,6 @@
 class Game {
 	bool mExitGame{ false };
 	bool mFullscreen{ true };
-	bool mLobby{ true };
 	bool mPlaying{ false };
 	SDL_Window* mWindow{};
 	SDL_Renderer* mRenderer{};
@@ -35,7 +34,7 @@ class Game {
 	void HandleGamepadBackButton(SDL_JoystickID id);
 	void HandleGamepadStartButton(SDL_JoystickID id);
 	void StopGame();
-	void ToggleGameState();
+	void StartGame();
 	void DisableFullscreen();
 	void ToggleFullscreen();
 	void Cleanup();
