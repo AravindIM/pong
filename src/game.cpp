@@ -114,16 +114,16 @@ void Game::EventLoop() {
 void Game::Update() {
 	float deltaTime = mClock.GetDTSec();
 	mClock.Reset();
-	if (mPlaying) {
-		for (Player& p : mPlayers) {
-			if (p.mPad) {
-				Sint16 yAxis = SDL_GetGamepadAxis(p.mPad, SDL_GAMEPAD_AXIS_LEFTY);
-				if (SDL_abs(yAxis) >= JOYSTICK_DEADZONE) {
-					if (yAxis < 0) p.Move(UP, deltaTime);
-					if (yAxis > 0) p.Move(DOWN, deltaTime);
-				}
+	for (Player& p : mPlayers) {
+		if (p.mPad) {
+			Sint16 yAxis = SDL_GetGamepadAxis(p.mPad, SDL_GAMEPAD_AXIS_LEFTY);
+			if (SDL_abs(yAxis) >= JOYSTICK_DEADZONE) {
+				if (yAxis < 0) p.Move(UP, deltaTime);
+				if (yAxis > 0) p.Move(DOWN, deltaTime);
 			}
 		}
+	}
+	if (mPlaying) {
 		mBall.Move(deltaTime);
 		HandleCollision();
 	}
