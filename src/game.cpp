@@ -169,6 +169,7 @@ void Game::HandleCollision() {
 		StopGame();
 	}
 	for (const Player& p : mPlayers) {
+		if (p.mPad == nullptr) continue;
 		if (!SDL_HasRectIntersectionFloat(&p.mRect, &mBall.mRect)) continue;
 		if (p.mVariant == RIGHT && mBall.mVx > 0) {
 			mBall.mRect.x = p.mRect.x - mBall.mRect.w;
