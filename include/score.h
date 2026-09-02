@@ -8,6 +8,8 @@ enum ScoreSegmentType {
 	SCORE_SEGMENT_VERTICAL
 };
 
+constexpr Uint8 MAX_SCORE = 20;
+
 constexpr float SCORE_SEGMENT_THICKNESS = 10.0f;
 
 constexpr int SCORE_MAX_DIGITS = 2;

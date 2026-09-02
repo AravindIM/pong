@@ -2,6 +2,7 @@
 
 #include <SDL3/SDL.h>
 #include "config.h"
+#include "score.h"
 
 // Count
 constexpr int MAX_PLAYERS = 2;
@@ -42,5 +43,8 @@ struct Player {
 	Player(PlayerVariant variant);
 	void Reset();
 	void Move(Direction dir, float deltaTime);
+	bool IsMaxScore();
+	void ResetScore();
+	void IncrementScore();
 	void Render(SDL_Renderer* renderer);
 };

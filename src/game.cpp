@@ -160,12 +160,12 @@ void Game::HandleCollision() {
 	}
 	if (mBall.mRect.x <= BALL_MIN_X) {
 		mBall.mRect.x = BALL_MIN_X;
-		mPlayers[1].mScore++;
+		mPlayers[1].IncrementScore();
 		StopGame();
 	}
 	else if (mBall.mRect.x >= BALL_MAX_X) {
 		mBall.mRect.x = BALL_MAX_X;
-		mPlayers[0].mScore++;
+		mPlayers[0].IncrementScore();
 		StopGame();
 	}
 	for (const Player& p : mPlayers) {
@@ -236,10 +236,13 @@ void Game::StopGame() {
 }
 
 void Game::ToggleGameState() {
+	if (mPlayers[0].IsMaxScore() || mPlayers[1].IsMaxScore()) {
+		mPlayers[0].ResetScore();
+		mPlayers[1].ResetScore();
+	}
 	if (mLobby) {
 		mLobby = false;
 		mPlaying = true;
-		mSound.Play(SOUND_START);
 	}
 	else if (!mPlaying) {
 		mLobby = true;
@@ -247,8 +250,8 @@ void Game::ToggleGameState() {
 		for (Player& p : mPlayers) {
 			p.Reset();
 		}
-		mLobby = true;
 	}
+	mSound.Play(SOUND_START);
 }
 
 void Game::DisableFullscreen() {

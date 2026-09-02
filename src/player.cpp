@@ -26,6 +26,20 @@ void Player::Move(Direction dir, float deltaTime) {
 	mRect.y = SDL_clamp(mRect.y + (float)dir * dy, PLAYER_PADDLE_MIN_Y, PLAYER_PADDLE_MAX_Y);
 }
 
+void Player::ResetScore() {
+	mScore = 0;
+}
+
+bool Player::IsMaxScore() {
+	return mScore >= MAX_SCORE;
+}
+
+void Player::IncrementScore() {
+	if (!IsMaxScore()) {
+		mScore++;
+	}
+}
+
 void Player::Render(SDL_Renderer* renderer) {
 	Uint8 color = mPad? JOINED_COLOR : LEFT_COLOR;
 
