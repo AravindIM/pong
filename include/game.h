@@ -14,12 +14,14 @@
 class Game {
 	bool mExitGame{ false };
 	bool mFullscreen{ true };
+	bool mLobby{ true };
 	bool mPlaying{ false };
 	SDL_Window* mWindow{};
 	SDL_Renderer* mRenderer{};
 	Player mPlayers[MAX_PLAYERS]{ Player(LEFT), Player(RIGHT) };
 	Ball mBall{};
 	Clock mClock{};
+	Clock mDelay{};
 	Sound mSound{};
 
 	void MainLoop();

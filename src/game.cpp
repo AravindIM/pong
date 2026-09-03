@@ -114,18 +114,28 @@ void Game::EventLoop() {
 void Game::Update() {
 	float deltaTime = mClock.GetDTSec();
 	mClock.Reset();
-	for (Player& p : mPlayers) {
-		if (p.mPad) {
-			Sint16 yAxis = SDL_GetGamepadAxis(p.mPad, SDL_GAMEPAD_AXIS_LEFTY);
-			if (SDL_abs(yAxis) >= JOYSTICK_DEADZONE) {
-				if (yAxis < 0) p.Move(UP, deltaTime);
-				if (yAxis > 0) p.Move(DOWN, deltaTime);
+	if (mLobby || mPlaying) {
+		for (Player& p : mPlayers) {
+			if (p.mPad) {
+				Sint16 yAxis = SDL_GetGamepadAxis(p.mPad, SDL_GAMEPAD_AXIS_LEFTY);
+				if (SDL_abs(yAxis) >= JOYSTICK_DEADZONE) {
+					if (yAxis < 0) p.Move(UP, deltaTime);
+					if (yAxis > 0) p.Move(DOWN, deltaTime);
+				}
 			}
 		}
 	}
 	if (mPlaying) {
 		mBall.Move(deltaTime);
 		HandleCollision();
+	}
+	else if (!mLobby && mDelay.GetDTSec() >= 3.0) {
+		mPlaying = true;
+		for (Player& p : mPlayers) {
+			p.Reset();
+		}
+		mBall.Reset();
+		mSound.Play(SOUND_START);
 	}
 }
 
@@ -148,6 +158,7 @@ void Game::RenderClear() {
 }
 
 void Game::HandleCollision() {
+	if (!mPlaying) return;
 	if (mBall.mRect.y <= BALL_MIN_Y) {
 		mBall.mRect.y = BALL_MIN_Y;
 		mBall.mVy *= -1;
@@ -161,12 +172,22 @@ void Game::HandleCollision() {
 	if (mBall.mRect.x <= BALL_MIN_X) {
 		mBall.mRect.x = BALL_MIN_X;
 		mPlayers[1].IncrementScore();
-		StopGame();
+		mDelay.Reset();
+		mPlaying = false;
+		mSound.Play(SOUND_SCORE);
+		if (mPlayers[0].IsMaxScore() || mPlayers[1].IsMaxScore()) {
+			StopGame();
+		}
 	}
 	else if (mBall.mRect.x >= BALL_MAX_X) {
 		mBall.mRect.x = BALL_MAX_X;
 		mPlayers[0].IncrementScore();
-		StopGame();
+		mDelay.Reset();
+		mPlaying = false;
+		mSound.Play(SOUND_SCORE);
+		if (mPlayers[0].IsMaxScore() || mPlayers[1].IsMaxScore()) {
+			StopGame();
+		}
 	}
 	for (const Player& p : mPlayers) {
 		if (p.mPad == nullptr) continue;
@@ -232,12 +253,14 @@ void Game::HandleGamepadStartButton(SDL_JoystickID id) {
 }
 
 void Game::StopGame() {
+	mLobby = true;
 	mPlaying = false;
-	mSound.Play(SOUND_SCORE);
+	mBall.Reset();
 }
 
 void Game::StartGame() {
-	if (!mPlaying) {
+	if (mLobby) {
+		mLobby = false;
 		mPlaying = true;
 		if (mPlayers[0].IsMaxScore() || mPlayers[1].IsMaxScore()) {
 			mPlayers[0].ResetScore();
