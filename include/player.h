@@ -39,8 +39,10 @@ struct Player {
 	PlayerVariant mVariant{};
 	SDL_Gamepad* mPad{};
 	Uint8 mScore{};
+	bool mAI;
 
 	Player(PlayerVariant variant);
+	bool IsActive() const;
 	void Reset();
 	void Move(Direction dir, float deltaTime);
 	bool IsMaxScore();

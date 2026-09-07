@@ -127,6 +127,21 @@ void Game::Update() {
 	}
 	if (mPlaying) {
 		mBall.Move(deltaTime);
+		for (Player& p : mPlayers) {
+			if (p.mAI) {
+				if ((p.mVariant == RIGHT && mBall.mVx > 0
+					&& mBall.mRect.x > WINDOW_WIDTH / 2)
+					|| (p.mVariant == LEFT && mBall.mVx < 0
+						&& mBall.mRect.x < WINDOW_WIDTH / 2)) {
+					if (mBall.mRect.y < p.mRect.y) {
+						p.Move(UP, deltaTime);
+					}
+					else if (mBall.mRect.y + mBall.mRect.h > p.mRect.y + p.mRect.h) {
+						p.Move(DOWN, deltaTime);
+					}
+				}
+			}
+		}
 		HandleCollision();
 	}
 	else if (!mLobby && mDelay.GetDTSec() >= 3.0) {
@@ -190,7 +205,7 @@ void Game::HandleCollision() {
 		}
 	}
 	for (const Player& p : mPlayers) {
-		if (p.mPad == nullptr) continue;
+		if (!p.IsActive()) continue;
 		if (!SDL_HasRectIntersectionFloat(&p.mRect, &mBall.mRect)) continue;
 		if (p.mVariant == RIGHT && mBall.mVx > 0) {
 			mBall.mRect.x = p.mRect.x - mBall.mRect.w;
@@ -245,7 +260,7 @@ void Game::HandleGamepadStartButton(SDL_JoystickID id) {
 		}
 	}
 	for (Player& p : mPlayers) {
-		if (!p.mPad) {
+		if (!p.IsActive()) {
 			p.mPad = pad;
 			return;
 		}
@@ -268,6 +283,9 @@ void Game::StartGame() {
 		}
 		mBall.Reset();
 		for (Player& p : mPlayers) {
+			if (!p.IsActive()) {
+				p.mAI = true;
+			}
 			p.Reset();
 		}
 		mSound.Play(SOUND_START);

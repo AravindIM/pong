@@ -1,9 +1,14 @@
 #include "player.h"
 
 Player::Player(PlayerVariant variant)
-	: mVariant(variant) 
+	: mVariant(variant),
+	mAI(false)
 {
 	Reset();
+}
+
+bool Player::IsActive() const {
+	return mAI || mPad != nullptr;
 }
 
 void Player::Reset() {
@@ -41,7 +46,7 @@ void Player::IncrementScore() {
 }
 
 void Player::Render(SDL_Renderer* renderer) {
-	Uint8 color = mPad? JOINED_COLOR : LEFT_COLOR;
+	Uint8 color = IsActive() ? JOINED_COLOR : LEFT_COLOR;
 
 	SDL_SetRenderDrawColor(renderer, color, color, color, 0xFF);
 	SDL_RenderFillRect(renderer, &mRect);
