@@ -204,20 +204,22 @@ void Game::HandleCollision() {
 			StopGame();
 		}
 	}
-	for (const Player& p : mPlayers) {
-		if (!p.IsActive()) continue;
-		if (!SDL_HasRectIntersectionFloat(&p.mRect, &mBall.mRect)) continue;
-		if (p.mVariant == RIGHT && mBall.mVx > 0) {
-			mBall.mRect.x = p.mRect.x - mBall.mRect.w;
-			mBall.mVx *= -1;
-			mSound.Play(SOUND_HIT);
-		}
-		else if (p.mVariant == LEFT && mBall.mVx < 0) {
-			mBall.mRect.x = p.mRect.x + p.mRect.w;
-			mBall.mVx *= -1;
-			mSound.Play(SOUND_HIT);
-		}
+	else {
+		for (const Player& p : mPlayers) {
+			if (!p.IsActive()) continue;
+			if (!SDL_HasRectIntersectionFloat(&p.mRect, &mBall.mRect)) continue;
+			if (p.mVariant == RIGHT && mBall.mVx > 0) {
+				mBall.mRect.x = p.mRect.x - mBall.mRect.w;
+				mBall.mVx *= -1;
+				mSound.Play(SOUND_HIT);
+			}
+			else if (p.mVariant == LEFT && mBall.mVx < 0) {
+				mBall.mRect.x = p.mRect.x + p.mRect.w;
+				mBall.mVx *= -1;
+				mSound.Play(SOUND_HIT);
+			}
 
+		}
 	}
 }
 
