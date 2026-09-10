@@ -38,6 +38,7 @@ bool Game::Init() {
 	if (!mSound.Init()) {
 		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Error", "SDL could not initialize the audio stream!", nullptr);
 	}
+	SDL_HideCursor();
 	return true;
 }
 
