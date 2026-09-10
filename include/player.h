@@ -45,7 +45,7 @@ struct Player {
 	bool IsActive() const;
 	void Reset();
 	void Move(Direction dir, float deltaTime);
-	bool IsMaxScore();
+	bool IsMaxScore() const;
 	void ResetScore();
 	void IncrementScore();
 	void Render(SDL_Renderer* renderer);

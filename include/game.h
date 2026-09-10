@@ -11,11 +11,21 @@
 #include "fps_calculator.h"
 #include "sound.h"
 
+constexpr float SCORE_FREEZE_SEC = 1.0f;
+constexpr float SERVE_DELAY_SEC = 3.0f;
+
+enum class State {
+	Reset,
+	Start,
+	Serve,
+	Playing,
+	Score,
+};
+
 class Game {
 	bool mExitGame{ false };
 	bool mFullscreen{ true };
-	bool mLobby{ true };
-	bool mPlaying{ false };
+	State mState{State::Reset};
 	SDL_Window* mWindow{};
 	SDL_Renderer* mRenderer{};
 	Player mPlayers[MAX_PLAYERS]{ Player(LEFT), Player(RIGHT) };
@@ -27,7 +37,11 @@ class Game {
 	void MainLoop();
 	void Tick();
 	void EventLoop();
+	void SetState(State state);
 	void Update();
+	void UpdatePlayers(float deltaTime);
+	void UpdateAI(float deltaTime);
+	void UpdateBall(float deltaTime);
 	void Render();
 	void RenderClear();
 	void HandleCollision();
@@ -35,8 +49,6 @@ class Game {
 	void RemovePad(SDL_JoystickID id);
 	void HandleGamepadBackButton(SDL_JoystickID id);
 	void HandleGamepadStartButton(SDL_JoystickID id);
-	void StopGame();
-	void StartGame();
 	void DisableFullscreen();
 	void ToggleFullscreen();
 	void Cleanup();

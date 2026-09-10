@@ -35,7 +35,7 @@ void Player::ResetScore() {
 	mScore = 0;
 }
 
-bool Player::IsMaxScore() {
+bool Player::IsMaxScore() const{
 	return mScore >= MAX_SCORE;
 }
 

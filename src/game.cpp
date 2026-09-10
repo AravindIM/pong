@@ -111,47 +111,110 @@ void Game::EventLoop() {
 	}
 }
 
-void Game::Update() {
-	float deltaTime = mClock.GetDTSec();
-	mClock.Reset();
-	if (mLobby || mPlaying) {
+void Game::SetState(State state) {
+	mState = state;
+	mDelay.Reset();
+
+	switch (state) {
+	case State::Reset:
+		mBall.Reset();
 		for (Player& p : mPlayers) {
-			if (p.mPad) {
-				Sint16 yAxis = SDL_GetGamepadAxis(p.mPad, SDL_GAMEPAD_AXIS_LEFTY);
-				if (SDL_abs(yAxis) >= JOYSTICK_DEADZONE) {
-					if (yAxis < 0) p.Move(UP, deltaTime);
-					if (yAxis > 0) p.Move(DOWN, deltaTime);
-				}
-			}
+			p.mScore = 0;
+			p.mAI = false;
+			p.mPad = nullptr;
+			p.Reset();
 		}
-	}
-	if (mPlaying) {
-		mBall.Move(deltaTime);
+		break;
+	case State::Start:
 		for (Player& p : mPlayers) {
-			if (p.mAI) {
-				if ((p.mVariant == RIGHT && mBall.mVx > 0
-					&& mBall.mRect.x > WINDOW_WIDTH / 2)
-					|| (p.mVariant == LEFT && mBall.mVx < 0
-						&& mBall.mRect.x < WINDOW_WIDTH / 2)) {
-					if (mBall.mRect.y < p.mRect.y) {
-						p.Move(UP, deltaTime);
-					}
-					else if (mBall.mRect.y + mBall.mRect.h > p.mRect.y + p.mRect.h) {
-						p.Move(DOWN, deltaTime);
-					}
-				}
+			if (!p.IsActive()) {
+				p.mAI = true;
 			}
+			p.Reset();
 		}
-		HandleCollision();
-	}
-	else if (!mLobby && mDelay.GetDTSec() >= 3.0) {
-		mPlaying = true;
+		break;
+	case State::Serve:
+		mBall.Reset();
 		for (Player& p : mPlayers) {
 			p.Reset();
 		}
+		break;
+	case State::Playing:
 		mBall.Reset();
 		mSound.Play(SOUND_START);
+		break;
+	case State::Score:
+		mSound.Play(SOUND_SCORE);
+		break;
 	}
+}
+
+void Game::Update() {
+	float deltaTime = mClock.GetDTSec();
+	mClock.Reset();
+	switch (mState) {
+	case State::Reset:
+		UpdatePlayers(deltaTime);
+		break;
+	case State::Start:
+		SetState(State::Playing);
+		break;
+	case State::Serve:
+		if (mDelay.GetDTSec() >= SERVE_DELAY_SEC) SetState(State::Playing);
+		UpdatePlayers(deltaTime);
+		break;
+	case State::Playing:
+		UpdatePlayers(deltaTime);
+		UpdateAI(deltaTime);
+		UpdateBall(deltaTime);
+		HandleCollision();
+		break;
+	case State::Score:
+		if (mDelay.GetDTSec() >= SCORE_FREEZE_SEC) {
+			for (const Player p : mPlayers) {
+				if (p.IsMaxScore()) {
+					SetState(State::Reset);
+					return;
+				}
+			}
+			SetState(State::Serve);
+		}
+		break;
+	}
+}
+
+void Game::UpdatePlayers(float deltaTime) {
+	for (Player& p : mPlayers) {
+		if (p.mPad) {
+			Sint16 yAxis = SDL_GetGamepadAxis(p.mPad, SDL_GAMEPAD_AXIS_LEFTY);
+			if (SDL_abs(yAxis) >= JOYSTICK_DEADZONE) {
+				if (yAxis < 0) p.Move(UP, deltaTime);
+				if (yAxis > 0) p.Move(DOWN, deltaTime);
+			}
+		}
+	}
+}
+
+void Game::UpdateAI(float deltaTime) {
+	for (Player& p : mPlayers) {
+		if (p.mAI) {
+			if ((p.mVariant == RIGHT && mBall.mVx > 0
+				&& mBall.mRect.x > WINDOW_WIDTH / 2)
+				|| (p.mVariant == LEFT && mBall.mVx < 0
+					&& mBall.mRect.x < WINDOW_WIDTH / 2)) {
+				if (mBall.mRect.y < p.mRect.y) {
+					p.Move(UP, deltaTime);
+				}
+				else if (mBall.mRect.y + mBall.mRect.h > p.mRect.y + p.mRect.h) {
+					p.Move(DOWN, deltaTime);
+				}
+			}
+		}
+	}
+}
+
+void Game::UpdateBall(float deltaTime) {
+	mBall.Move(deltaTime);
 }
 
 void Game::Render() {
@@ -173,7 +236,7 @@ void Game::RenderClear() {
 }
 
 void Game::HandleCollision() {
-	if (!mPlaying) return;
+	if (mState != State::Playing) return;
 	if (mBall.mRect.y <= BALL_MIN_Y) {
 		mBall.mRect.y = BALL_MIN_Y;
 		mBall.mVy *= -1;
@@ -187,22 +250,12 @@ void Game::HandleCollision() {
 	if (mBall.mRect.x <= BALL_MIN_X) {
 		mBall.mRect.x = BALL_MIN_X;
 		mPlayers[1].IncrementScore();
-		mDelay.Reset();
-		mPlaying = false;
-		mSound.Play(SOUND_SCORE);
-		if (mPlayers[0].IsMaxScore() || mPlayers[1].IsMaxScore()) {
-			StopGame();
-		}
+		SetState(State::Score);
 	}
 	else if (mBall.mRect.x >= BALL_MAX_X) {
 		mBall.mRect.x = BALL_MAX_X;
 		mPlayers[0].IncrementScore();
-		mDelay.Reset();
-		mPlaying = false;
-		mSound.Play(SOUND_SCORE);
-		if (mPlayers[0].IsMaxScore() || mPlayers[1].IsMaxScore()) {
-			StopGame();
-		}
+		SetState(State::Score);
 	}
 	else {
 		for (const Player& p : mPlayers) {
@@ -257,7 +310,7 @@ void Game::HandleGamepadStartButton(SDL_JoystickID id) {
 
 	for (Player& p : mPlayers) {
 		if (p.mPad == pad) {
-			StartGame();
+			SetState(State::Start);
 			return;
 		}
 	}
@@ -266,31 +319,6 @@ void Game::HandleGamepadStartButton(SDL_JoystickID id) {
 			p.mPad = pad;
 			return;
 		}
-	}
-}
-
-void Game::StopGame() {
-	mLobby = true;
-	mPlaying = false;
-	mBall.Reset();
-}
-
-void Game::StartGame() {
-	if (mLobby) {
-		mLobby = false;
-		mPlaying = true;
-		if (mPlayers[0].IsMaxScore() || mPlayers[1].IsMaxScore()) {
-			mPlayers[0].ResetScore();
-			mPlayers[1].ResetScore();
-		}
-		mBall.Reset();
-		for (Player& p : mPlayers) {
-			if (!p.IsActive()) {
-				p.mAI = true;
-			}
-			p.Reset();
-		}
-		mSound.Play(SOUND_START);
 	}
 }
 
