@@ -14,10 +14,10 @@ bool Player::IsActive() const {
 void Player::Reset() {
 	float x;
 	switch (mVariant) {
-	case LEFT:
+	case PlayerVariant::Left:
 		x = PLAYER1_PADDLE_START_X;
 		break;
-	case RIGHT:
+	case PlayerVariant::Right:
 		x = PLAYER2_PADDLE_START_X;
 		break;
 	default:

@@ -25,13 +25,13 @@ constexpr float PLAYER_PADDLE_MAX_Y = (WINDOW_HEIGHT - PLAYER_PADDLE_HEIGHT);
 constexpr float PLAYER_PADDLE_SPEED = (WINDOW_HEIGHT / 2);
 
 
-enum Direction {
-	UP = -1,
-	DOWN = 1
+enum class Direction {
+	Up = -1,
+	Down = 1
 };
-enum PlayerVariant {
-	LEFT,
-	RIGHT,
+enum class PlayerVariant {
+	Left,
+	Right,
 };
 
 struct Player {

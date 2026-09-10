@@ -188,8 +188,8 @@ void Game::UpdatePlayers(float deltaTime) {
 		if (p.mPad) {
 			Sint16 yAxis = SDL_GetGamepadAxis(p.mPad, SDL_GAMEPAD_AXIS_LEFTY);
 			if (SDL_abs(yAxis) >= JOYSTICK_DEADZONE) {
-				if (yAxis < 0) p.Move(UP, deltaTime);
-				if (yAxis > 0) p.Move(DOWN, deltaTime);
+				if (yAxis < 0) p.Move(Direction::Up, deltaTime);
+				if (yAxis > 0) p.Move(Direction::Down, deltaTime);
 			}
 		}
 	}
@@ -198,15 +198,15 @@ void Game::UpdatePlayers(float deltaTime) {
 void Game::UpdateAI(float deltaTime) {
 	for (Player& p : mPlayers) {
 		if (p.mAI) {
-			if ((p.mVariant == RIGHT && mBall.mVx > 0
+			if ((p.mVariant == PlayerVariant::Right && mBall.mVx > 0
 				&& mBall.mRect.x > WINDOW_WIDTH / 2)
-				|| (p.mVariant == LEFT && mBall.mVx < 0
+				|| (p.mVariant == PlayerVariant::Left && mBall.mVx < 0
 					&& mBall.mRect.x < WINDOW_WIDTH / 2)) {
 				if (mBall.mRect.y < p.mRect.y) {
-					p.Move(UP, deltaTime);
+					p.Move(Direction::Up, deltaTime);
 				}
 				else if (mBall.mRect.y + mBall.mRect.h > p.mRect.y + p.mRect.h) {
-					p.Move(DOWN, deltaTime);
+					p.Move(Direction::Down, deltaTime);
 				}
 			}
 		}
@@ -261,12 +261,12 @@ void Game::HandleCollision() {
 		for (const Player& p : mPlayers) {
 			if (!p.IsActive()) continue;
 			if (!SDL_HasRectIntersectionFloat(&p.mRect, &mBall.mRect)) continue;
-			if (p.mVariant == RIGHT && mBall.mVx > 0) {
+			if (p.mVariant == PlayerVariant::Right && mBall.mVx > 0) {
 				mBall.mRect.x = p.mRect.x - mBall.mRect.w;
 				mBall.mVx *= -1;
 				mSound.Play(SOUND_HIT);
 			}
-			else if (p.mVariant == LEFT && mBall.mVx < 0) {
+			else if (p.mVariant == PlayerVariant::Left && mBall.mVx < 0) {
 				mBall.mRect.x = p.mRect.x + p.mRect.w;
 				mBall.mVx *= -1;
 				mSound.Play(SOUND_HIT);

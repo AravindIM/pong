@@ -28,7 +28,7 @@ class Game {
 	State mState{State::Reset};
 	SDL_Window* mWindow{};
 	SDL_Renderer* mRenderer{};
-	Player mPlayers[MAX_PLAYERS]{ Player(LEFT), Player(RIGHT) };
+	Player mPlayers[MAX_PLAYERS]{ Player(PlayerVariant::Left), Player(PlayerVariant::Right) };
 	Ball mBall{};
 	Clock mClock{};
 	Clock mDelay{};
