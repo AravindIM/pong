@@ -1,5 +1,17 @@
 {
   "dependencies": [
-    "sdl3"
+    {
+      "name": "sdl3",
+      "platform": "!linux"
+    },
+    {
+      "name": "sdl3",
+      "default-features": false,
+      "features": [
+        "x11",
+        "wayland"
+      ],
+      "platform": "linux"
+    }
   ]
 }
