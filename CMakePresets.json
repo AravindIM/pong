@@ -39,6 +39,54 @@
                 "CMAKE_BUILD_TYPE": "Release",
                 "CMAKE_PROJECT_TOP_LEVEL_INCLUDES": "$env{VSINSTALLDIR}Common7/IDE/CommonExtensions/Microsoft/CMake/cmake/Microsoft/SegmentHeap.cmake"
             }
+        },
+        {
+            "name": "ci-base",
+            "hidden": true,
+            "description": "Shared CI settings. ci-windows uses the Visual Studio 18 2026 generator, which is multi-config -- hence the Release configuration on its build preset. The workflow pins the windows-2025-vs2026 runner to match.",
+            "binaryDir": "${sourceDir}/build",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release",
+                "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake"
+            }
+        },
+        {
+            "name": "ci-windows",
+            "displayName": "CI Windows x64",
+            "inherits": "ci-base",
+            "generator": "Visual Studio 18 2026",
+            "architecture": "x64",
+            "cacheVariables": {
+                "VCPKG_TARGET_TRIPLET": "x64-windows-static",
+                "CMAKE_MSVC_RUNTIME_LIBRARY": "MultiThreaded$<$<CONFIG:Debug>:Debug>"
+            }
+        },
+        {
+            "name": "ci-linux",
+            "displayName": "CI Linux x64",
+            "inherits": "ci-base",
+            "generator": "Ninja"
+        },
+        {
+            "name": "ci-macos",
+            "displayName": "CI macOS arm64",
+            "inherits": "ci-base",
+            "generator": "Ninja"
+        }
+    ],
+    "buildPresets": [
+        {
+            "name": "ci-windows",
+            "configurePreset": "ci-windows",
+            "configuration": "Release"
+        },
+        {
+            "name": "ci-linux",
+            "configurePreset": "ci-linux"
+        },
+        {
+            "name": "ci-macos",
+            "configurePreset": "ci-macos"
         }
     ]
 }
