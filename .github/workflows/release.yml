@@ -39,17 +39,33 @@ jobs:
         with:
           ref: ${{ inputs.tag }}
 
-      # vcpkg builds SDL3 from source and fails listing these if absent.
+      # vcpkg builds SDL3 from source, so the whole Linux dependency set has to
+      # be present. This is SDL's own documented Ubuntu list (README-linux.md)
+      # plus the Wayland packages, which that list predates. Missing entries do
+      # not fail loudly -- a missing one either silently disables a feature
+      # (leaving the AppImage without a video or audio driver) or dies deep in
+      # SDL's configure, as libxtst-dev did with "dependency package for XTEST".
       - name: Install SDL3 build dependencies
         if: matrix.name == 'linux'
         run: |
           sudo apt-get update
-          sudo apt-get install -y \
-            libx11-dev libxext-dev libxrandr-dev libxi-dev libxcursor-dev \
-            libxfixes-dev libxss-dev libxkbcommon-dev \
+          # Required: without any of these SDL loses a video or audio driver,
+          # so a missing one must fail the job rather than pass quietly.
+          sudo apt-get install -y --no-install-recommends \
+            libx11-dev libxext-dev libxrandr-dev libxcursor-dev libxfixes-dev \
+            libxi-dev libxss-dev libxtst-dev libxkbcommon-dev \
             libwayland-dev wayland-protocols \
-            libegl1-mesa-dev libgl1-mesa-dev \
+            libgl1-mesa-dev libgles2-mesa-dev libegl1-mesa-dev \
+            libdrm-dev libgbm-dev \
             libasound2-dev libpulse-dev libudev-dev libdbus-1-dev libibus-1.0-dev
+          # Optional: extra backends SDL builds if present. Package names here
+          # drift between Ubuntu releases, and none is worth failing a release
+          # over, so install them individually and keep going on misses.
+          for pkg in libaudio-dev libjack-dev libsndio-dev libpipewire-0.3-dev \
+                     libdecor-0-dev libthai-dev libfribidi-dev libusb-1.0-0-dev; do
+            sudo apt-get install -y --no-install-recommends "$pkg" \
+              || echo "::notice::optional dependency unavailable, skipping: $pkg"
+          done
 
       # Supplies CMake and Ninja; macOS runners ship no Ninja.
       - uses: lukka/get-cmake@latest
