@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Pong
+Comment=Multiplayer Pong for Controllers
+Exec=pong
+Icon=pong
+Categories=Game;ArcadeGame;
+Terminal=false

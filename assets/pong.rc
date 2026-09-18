@@ -1,0 +1,3 @@
+// Windows executable icon. The lowest-numbered ICON resource is the one the
+// shell uses for the .exe, so keep this at 1.
+1 ICON "pong.ico"
