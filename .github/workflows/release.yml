@@ -1,0 +1,168 @@
+name: Release
+
+# Manual only -- pushes and tag pushes never trigger a release.
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Existing git tag to release (e.g. v0.1.0)"
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build ${{ matrix.name }}
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # Explicit VS 2026 label: the ci-windows preset pins the
+          # "Visual Studio 18 2026" generator, so don't ride windows-latest.
+          - name: windows
+            runner: windows-2025-vs2026
+            preset: ci-windows
+          # Oldest supported runner on purpose: the AppImage inherits this
+          # glibc floor, so building here keeps it runnable on more distros.
+          - name: linux
+            runner: ubuntu-22.04
+            preset: ci-linux
+          - name: macos
+            runner: macos-latest
+            preset: ci-macos
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.tag }}
+
+      # vcpkg builds SDL3 from source and fails listing these if absent.
+      - name: Install SDL3 build dependencies
+        if: matrix.name == 'linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libx11-dev libxext-dev libxrandr-dev libxi-dev libxcursor-dev \
+            libxfixes-dev libxss-dev libxkbcommon-dev \
+            libwayland-dev wayland-protocols \
+            libegl1-mesa-dev libgl1-mesa-dev \
+            libasound2-dev libpulse-dev libudev-dev libdbus-1-dev libibus-1.0-dev
+
+      # Supplies CMake and Ninja; macOS runners ship no Ninja.
+      - uses: lukka/get-cmake@latest
+
+      # No vcpkgGitCommitId: the baseline in vcpkg-configuration.json pins the
+      # port versions. Also wires vcpkg binary caching to the Actions cache.
+      - name: Set up vcpkg
+        uses: lukka/run-vcpkg@v11
+        with:
+          doNotCache: false
+
+      - name: Configure
+        run: cmake --preset ${{ matrix.preset }}
+
+      - name: Build
+        run: cmake --build --preset ${{ matrix.preset }}
+
+      - name: Package (Windows)
+        if: matrix.name == 'windows'
+        shell: bash
+        run: |
+          mkdir -p dist
+          # Static triplet, so this is the whole program -- no DLLs alongside.
+          cp build/Release/pong.exe "dist/pong-${{ inputs.tag }}-windows-x64.exe"
+
+      - name: Package (Linux)
+        if: matrix.name == 'linux'
+        run: |
+          mkdir -p dist
+          cmake --install build --prefix AppDir/usr
+          # Keep the tool out of the workspace: it is itself an *.AppImage and
+          # would otherwise be indistinguishable from the one we produce.
+          wget -q -O "$RUNNER_TEMP/linuxdeploy" \
+            https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage
+          chmod +x "$RUNNER_TEMP/linuxdeploy"
+          # Runners have no libfuse2, so linuxdeploy cannot mount itself.
+          export APPIMAGE_EXTRACT_AND_RUN=1
+          # The appimage output plugin writes exactly this filename, into the cwd.
+          export OUTPUT="pong-${TAG}-linux-x86_64.AppImage"
+          "$RUNNER_TEMP/linuxdeploy" \
+            --appdir AppDir \
+            --executable AppDir/usr/bin/pong \
+            --desktop-file assets/pong.desktop \
+            --icon-file assets/pong.png \
+            --output appimage
+          mv "$OUTPUT" dist/
+        env:
+          TAG: ${{ inputs.tag }}
+
+      - name: Package (macOS)
+        if: matrix.name == 'macos'
+        run: |
+          # -B, because cpack otherwise writes into the build tree, not the cwd.
+          cpack --config build/CPackConfig.cmake -G DragNDrop -B dist \
+            -D CPACK_PACKAGE_VERSION="${TAG#v}"
+          mv dist/*.dmg "dist/pong-${TAG}-macos-arm64.dmg"
+          # cpack leaves its staging tree behind; it must not reach the release.
+          rm -rf dist/_CPack_Packages
+        env:
+          TAG: ${{ inputs.tag }}
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pong-${{ matrix.name }}
+          path: dist/*
+          if-no-files-found: error
+
+  release:
+    name: Publish release
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.tag }}
+          # git-cliff needs the full history and every tag to scope the notes.
+          fetch-depth: 0
+
+      # --current, not --latest: the checkout above leaves HEAD exactly on the
+      # requested tag, so this scopes notes to that tag's commit range.
+      - name: Generate release notes
+        id: changelog
+        uses: orhun/git-cliff-action@v4
+        with:
+          config: cliff.toml
+          args: --current --strip header
+
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+
+      - name: Publish
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ inputs.tag }}
+          name: ${{ inputs.tag }}
+          files: dist/*
+          draft: false
+          prerelease: ${{ contains(inputs.tag, '-') }}
+          body: |
+            ${{ steps.changelog.outputs.content }}
+
+            ## Install
+
+            | Platform | Asset |
+            | --- | --- |
+            | Windows | `pong-${{ inputs.tag }}-windows-x64.exe` -- self-contained, no DLLs needed |
+            | Linux | `pong-${{ inputs.tag }}-linux-x86_64.AppImage` -- `chmod +x` then run |
+            | macOS | `pong-${{ inputs.tag }}-macos-arm64.dmg` -- Apple Silicon |
+
+            These builds are unsigned:
+
+            - **Windows** -- SmartScreen warns on first launch; choose *More info -> Run anyway*.
+            - **macOS** -- Gatekeeper blocks it until you clear the quarantine flag:
+              `xattr -dr com.apple.quarantine /Applications/pong.app`
