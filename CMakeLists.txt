@@ -48,6 +48,10 @@ target_link_libraries(pong PRIVATE SDL3::SDL3)
 if (WIN32)
   enable_language(RC)
   target_sources(pong PRIVATE "assets/pong.rc")
+  # GUI subsystem; without it MSVC links the console subsystem and Windows opens
+  # a console window behind the game. Requires SDL_main.h in pong.cpp, which
+  # supplies the WinMain this subsystem entry point needs.
+  set_target_properties(pong PROPERTIES WIN32_EXECUTABLE TRUE)
 elseif (APPLE)
   set(PONG_ICNS "${CMAKE_CURRENT_SOURCE_DIR}/assets/pong.icns")
   target_sources(pong PRIVATE "${PONG_ICNS}")
