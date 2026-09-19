@@ -5,10 +5,10 @@ Supports Single Player AI mode if you start the game without another controller.
 
 # Controls
 
-- *Start* - Join controllers. Start Game if a controller that joined presses it
-- *Select*/ESC - Exit Fullscreen
-- *F11* - Toggle Fullscreen
-- *Right Joystick* - Moves the paddle
+- **Start** - Join controllers. Start Game if a controller that joined presses it
+- **Select**/**ESC** - Exit Fullscreen
+- **F11** - Toggle Fullscreen
+- **Right Joystick** - Moves the paddle
 
 # Contributions
 
