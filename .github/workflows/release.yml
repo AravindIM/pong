@@ -105,11 +105,16 @@ jobs:
           export APPIMAGE_EXTRACT_AND_RUN=1
           # The appimage output plugin writes exactly this filename, into the cwd.
           export OUTPUT="pong-${TAG}-linux-x86_64.AppImage"
+          # One --icon-file per resolution; linuxdeploy reads each icon's own
+          # size and files it under hicolor/<size>/apps. It rejects any size
+          # outside its fixed list, so the generated set stops at 512.
+          icons=()
+          for f in assets/icons/*/pong.png; do icons+=(--icon-file "$f"); done
           "$RUNNER_TEMP/linuxdeploy" \
             --appdir AppDir \
             --executable AppDir/usr/bin/pong \
             --desktop-file assets/pong.desktop \
-            --icon-file assets/pong.png \
+            "${icons[@]}" \
             --output appimage
           mv "$OUTPUT" dist/
         env:
