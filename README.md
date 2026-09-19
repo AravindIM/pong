@@ -3,6 +3,8 @@ Multiplayer Pong for Controllers
 
 Supports Single Player AI mode if you start the game without another controller.
 
+You play upto the max score of 20 points and then the game resets.
+
 # Controls
 
 - **Start** - Join controllers. Start Game if a controller that joined presses it
